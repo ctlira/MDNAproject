@@ -11,15 +11,15 @@ id	name	vstd	b	r-uniquac	q-uniquac	m	sigma	eps/k	source	rho eq	A	B	C	D	E	TL	TU
 5822	WATER	18.05	14.5	0.92	1.4	1.0656	3.001	366.51	17	116	17.863	0.058606	-0.095396	0.21389	-0.14126	273.16	647.1
 9	nsites																
 id	name	hostid	hostname	noccur													
-12	ether O	1122	"1,4-DIOXANE"	1													
-512	chloroform H	5355	CHLOROFORM	1													
-2	hydroxyl O	5350	METHANOL	1													
-502	hydroxyl H	5350	METHANOL	1													
-1002	carboxylic acid	5247	ACETIC ACID	1													
-513	hydroxyl H	7609	ETHYLENE GLYCOL	2													
-13	hydroxyl O	7609	ETHYLENE GLYCOL	2													
-14	water O	5822	WATER	2													
-514	water H	5822	WATER	2													
+12	1,4dioxane_O	1122	"1,4-DIOXANE"	1													
+512	chloroform_H	5355	CHLOROFORM	1													
+2	hydroxyl_O_MeOH	5350	METHANOL	1													
+502	hydroxyl_H_MeOH	5350	METHANOL	1													
+1002	acetic_acid	5247	ACETIC ACID	1													
+513	hydroxyl_H_EG	7609	ETHYLENE GLYCOL	2													
+13	hydroxyl_O_EG	7609	ETHYLENE GLYCOL	2													
+14	water_O	5822	WATER	2													
+514	water_H	5822	WATER	2													
 25	n bonding pairs																
 siteId1	host1	siteId2	host2	kappa	epsAD/K	source											
 2	METHANOL	502	METHANOL	0.03518	2899.5	17											

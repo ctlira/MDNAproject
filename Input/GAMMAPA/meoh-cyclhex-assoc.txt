@@ -6,8 +6,8 @@ id	name	vstd	b	r-uniquac	q-uniquac	m	sigma	eps/k	source	rho eq	A	B	C	D	E	TL	TU
 715	CYCLOHEXANE	90.38	90.38	4.0475	3.24	2.5305	3.8499	278.11	16	105	0.88998	0.27376	553.8	0.28571	0	279.69	553.8
 2	nsites																
 id	name	hostid	hostname	noccur													
-2	hydroxyl O	5350	METHANOL	1													
-502	hydroxyl H	5350	METHANOL	1													
+2	hydroxyl_O_MeOH	5350	METHANOL	1													
+502	hydroxyl_H_MeOH	5350	METHANOL	1													
 1	n bonding pairs																
 siteId1	host1	siteId2	host2	kappa	epsAD/K	source											
 2	METHANOL	502	METHANOL	0.49749	2957.6	16											
