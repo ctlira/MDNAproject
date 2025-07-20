@@ -236,7 +236,7 @@ end subroutine vlu
 !
 ! *******************************************************
 
-! GetGammaPa()
+! GpaCalc()
 !
 ! main entry point for GAMMA_PA application
 ! GetGammaPa loads parameters to gamma_pa
@@ -244,7 +244,7 @@ end subroutine vlu
 !
 !*********************************************************
 !
-Subroutine GetGammaPa(KOP,iErr)			! JRE
+Subroutine GpaCalc(kop, Kcalc, Tkelvin,Pbar, gammaPas, dgammaPas,iErr)
 use GPA_CONSTANTS
 ! constants includes the outfile id which should not be used for another file
 use GPA_SITENSPECIES
@@ -261,8 +261,10 @@ character(len=10) :: ver = '0.2TPT1'
 ! INTEGER NSUB,  NSUP
 
 INTEGER KOP(10), KCALC, ioErr
-real*8 T, P
+real*8 Tkelvin, Pbar
 REAL*8, dimension(:), allocatable :: gamma, dgamma
+REAL*8 gammaPas(*), dgammaPas(*)
+
 
 integer i,j,k,iErr
 
@@ -270,32 +272,8 @@ CHARACTER(LEN=255) dumString		! JRE
 LOGICAL LOUDER						! JRE
 LOUDER=.TRUE.						! JRE
 iErr=0
-GPAdir='c:\MDNAproject\'			! JRE
 
-! for physical and combinatorial models
-! aparam, bparam for NRTL, Nagata, Wilson, tau for NRTL, Aij for SH
-
-! Prepare for output
-dumString=TRIM(GPAdir)//"Output\GAMMAPAout.txt"		! JRE
-OPEN(outfile, ioStat=ioErr, file=dumString)
-if (ioErr.ne.0) then
-	if(LOUDER)print *, 'Could not open OUTPUT/GAMMAPAout.txt. Error Code = ', ioErr
-	iErr=ioErr
-	return
-else
-	if(LOUDER)print *, 'File Output/GAMMAPAout.txt opened successfully.'
-end if
-dumString=TRIM(GPAdir)//"Output\GAMMAPAdebug.txt"	! JRE
-OPEN(debugfile, ioStat=ioErr, file=dumString)
-if (ioErr.ne.0) then
-	if(LOUDER)print *, 'Could not open OUTPUT/GAMMAPAdebug.txt. Error Code = ', ioErr
-	iErr=ioErr
-	return
-else
-	if(LOUDER)print *, 'File Output/GAMMAPAdebug.txt opened successfully.'
-end if
-
-call loadsites(KOP)
+call loadsites(KOP,iErr)
 
 ! nc is now known
 IF(.NOT.ALLOCATED(x))allocate(x(nc))
@@ -330,7 +308,7 @@ endif
 ! load physical parameters
 select case (kop(4))
     case (0)
-        call loadnrtl()
+        call loadnrtl(iErr)
         if(kop(1).gt.1) then
             write(debugfile,*) ' *** GMNRTL Physical aij'
             write(debugfile,'(6G12.5)') aparam
@@ -366,7 +344,7 @@ select case (kop(4))
             write(debugfile,*) ' *** GMUnagata Physical bij'
             write(debugfile,'(6G12.5)') bparam
             write(debugfile,*) ' *** GMUnagata Physical aij + bij/T'
-            write(debugfile,'(6G12.5)') aparam + bparam/T
+            write(debugfile,'(6G12.5)') aparam + bparam/Tkelvin
         endif
 
 end select
@@ -378,6 +356,7 @@ IF (kop(2) .EQ. 3) THEN
         enddo
 	endif
 ENDIF
+call gamma_pa(kop, Kcalc, Tkelvin,Pbar, gamma, dgamma)
 if(allocated(gamma)) deallocate(gamma)
 if(allocated(dgamma)) deallocate(dgamma)
 if(allocated(aparam)) deallocate(aparam)
@@ -399,7 +378,7 @@ if(allocated(q_uniquac)) deallocate(q_uniquac)
 if(allocated(vstd)) deallocate(vstd)
 if(allocated(vparms)) deallocate(vparms)
 RETURN
-END SubRoutine GetGammaPa
+END SubRoutine GpaCalc
 !****************************************************************
 
 ! Section 3 continued
@@ -417,9 +396,9 @@ END SubRoutine GetGammaPa
 !
 !****************************************************************************
 
-SUBROUTINE LOADSITES(KOP)
+SUBROUTINE LOADSITES(KOP,iErr)
 
-use GPA_CONSTANTS, only: outfile
+use GPA_CONSTANTS !, only: outfile
 use GPA_SITENSPECIES
 use GPA_VOLUMES
 
@@ -428,10 +407,25 @@ implicit none
 ! passed variables
 integer :: start_index, KOP(10)
 ! local variables
-integer ::  i, j, k, ioErr, hostid, nsiteparm, id1, id2, dnrflagmx, acptflagmx
+integer ::  i, j, k, ioErr, hostid, nsiteparm, id1, id2, dnrflagmx, acptflagmx, iErr
 character*500 :: data_line
 character*100 :: data_field, filesites
 LOGICAL :: file_exists = .FALSE.
+CHARACTER(LEN=255) dumString		! JRE
+LOGICAL LOUDER						! JRE
+LOUDER=.TRUE.						! JRE
+iErr=0
+! Prepare for output
+filesites=TRIM(GPAdir)//"input\ParmsGpaPUREvdw.txt"		! JRE
+OPEN(1001, ioStat=ioErr, file=filesites)
+if (ioErr.ne.0) then
+	if(LOUDER)print *, 'Could not open input\ParmsGpaPUREvdw.txt. Error Code = ', ioErr
+	iErr=ioErr
+	return
+else
+	if(LOUDER)print *, 'File input\ParmsGpaPUREvdw.txt opened successfully.'
+    file_exists=.TRUE.
+end if
 
 DO WHILE (.NOT. file_exists)
     print *, 'Enter a the name of the tab-delimited sites input file:'
@@ -441,15 +435,16 @@ DO WHILE (.NOT. file_exists)
 	INQUIRE(FILE=trim(filesites), EXIST=file_exists)
 	IF(.NOT. file_exists) print *, 'That file is not found. Check folder and spelling.'
 	print *, ' '
+	IF(file_exists)OPEN(UNIT=1001, ioStat = ioErr, FILE=filesites)
+	if (ioErr.ne.0) then
+		print *, 'Could not open sites file. Error Code = ', ioErr
+	else
+		print *, 'Sites file opened successfully.'
+	end if
 END DO
 
 WRITE(outfile,*) 'Pure/Assoc file: '//trim(filesites)
-OPEN(UNIT=1001, ioStat = ioErr, FILE=trim(filesites))
-if (ioErr.ne.0) then
-	print *, 'Could not open sites file. Error Code = ', ioErr
-else
-	print *, 'Sites file opened successfully.'
-end if
+
 READ(UNIT=1001, END=106, FMT='(A)') data_line ! title
 READ(UNIT=1001, END=106, FMT='(A)') data_line ! KOP
 start_index = 1
@@ -622,20 +617,35 @@ END SUBROUTINE LOADSITES
 !
 !**********************************************
 
-SUBROUTINE LOADNRTL()
+SUBROUTINE LOADNRTL(iErr)
 
-use GPA_CONSTANTS, only: outfile
+use GPA_CONSTANTS !, only: outfile
 use GPA_SITENSPECIES, only: comp, nc
 USE GPA_PHYS_PARMS, ONLY: aparam, bparam, alpha
 
 integer :: start_index, npair, index1, index2, compid1, compid2
 
 ! local variables
-integer :: i, j, id1, id2, ioErr
+integer :: i, j, id1, id2, ioErr,iErr
 character*500 :: data_line
 character*100 :: data_field
 character*100 :: filenrtl
 LOGICAL :: file_exists = .FALSE.
+CHARACTER(LEN=255) dumString		! JRE
+LOGICAL LOUDER						! JRE
+LOUDER=.TRUE.						! JRE
+iErr=0
+! Prepare for output
+filenrtl=TRIM(GPAdir)//"input\ParmsGpaNRTLvdw.txt"		! JRE
+OPEN(1001, ioStat=ioErr, file=filenrtl)
+if (ioErr.ne.0) then
+	if(LOUDER)print *, 'Could not open input\ParmsGpaNRTLvdw.txt. Error Code = ', ioErr
+	iErr=ioErr
+	return
+else
+	if(LOUDER)print *, 'File input\ParmsGpaNRTLvdw.txt opened successfully.'
+    file_exists=.TRUE.
+end if
 
 DO WHILE (.NOT. file_exists)
 	print *, 'Enter a the name of the tab-delimited NRTL parameter file:'
@@ -645,15 +655,15 @@ DO WHILE (.NOT. file_exists)
 	INQUIRE(FILE=trim(filenrtl), EXIST=file_exists)
 	IF(.NOT. file_exists) print *, 'That file is not found. Check folder and spelling.'
 	print *, ' '
+	OPEN(UNIT=1001, ioStat = ioErr, FILE=trim(filenrtl))
+	if (ioErr.ne.0) then
+		print *, 'Could not open NRTL file. Error Code = ', ioErr
+	else
+		print *, 'NRTL file opened successfully.'
+	end if
 END DO
 
 WRITE(outfile,*) 'NRTL file: '//trim(filenrtl)
-OPEN(UNIT=1001, ioStat = ioErr, FILE=trim(filenrtl))
-if (ioErr.ne.0) then
-	print *, 'Could not open NRTL file. Error Code = ', ioErr
-else
-	print *, 'NRTL file opened successfully.'
-end if
 start_index = 1
 READ(UNIT=1001, END=106, FMT='(A)') data_line
 call parse_line(start_index,data_line,data_field)

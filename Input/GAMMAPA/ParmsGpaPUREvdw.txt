@@ -1,0 +1,14 @@
+pair id	ed		ea		eda	kappa (cm3/mol)	epsAD/k (K)	source	comment	citation
+1	1		501							
+2	2	METHANOL	502	METHANOL		20	100.2	17	not realistic, used only for testing/benchmarking, CaseStudy1	Benchmark2 - internal test document, random (unrealistic) parameter values to test code
+3	3	ETHANOL	503	ETHANOL		30	100.2	17	not realistic, used only for testing/benchmarking, CaseStudy1	Benchmark2 - internal test document, random (unrealistic) parameter values to test code
+4	4	1-PROPANOL	504	1-PROPANOL						
+5	5	1-BUTANOL	505	1-BUTANOL						
+6	6	1-PENTANOL	506	1-PENTANOL						
+7	7	1-HEXANOL	507	1-HEXANOL						
+8	8	2-METHYL-1-PROPANOL	508	2-METHYL-1-PROPANOL						
+9	9	ISOPROPANOL	509	ISOPROPANOL						
+10	10	2-BUTANOL	510	2-BUTANOL						
+11	11	2-METHYL-2-PROPANOL	511	2-METHYL-2-PROPANOL						
+12	2	METHANOL	503	ETHANOL		25	100.2	17	not realistic, used only for testing/benchmarking, CaseStudy1	Benchmark2 - internal test document, random (unrealistic) parameter values to test code
+11	3	ETHANOL	502	METHANOL		35	100.2	17	not realistic, used only for testing/benchmarking, CaseStudy1	Benchmark2 - internal test document, random (unrealistic) parameter values to test code
