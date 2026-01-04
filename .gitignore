@@ -1,7 +1,10 @@
 *Debug/
 *Release/
+*.i90
 *.obj
 *.suo
 *.u2d
 *.user
+*.mod
+*genmod.f90
 PGLDll.dll
