@@ -14,9 +14,9 @@
 ! Option codes kop() set by the association parameter input file
 ! Debug options
 ! kop(1) == 0 no debug printing
-! kop(1) == 1 for debug printing of only gammas and dll version
+! kop(1) == 1 for debug printing of only gammas and code version
 ! kop(1) == 2 adds printing of X, rho, deltas, etc.
-! kop(1) == 3 adds printing of delta matrix indexes, and gamma output to gammas.txt
+! kop(1) == 3 adds printing of delta matrix indexes, and gamma, Hxs, volume output to csv files.
 ! rdf equation to use. The calculation uses packing factor based on bvol for CPA, ESD, VDW
 ! kop(2) == 0 VdW
 ! kop(2) == 1 ESD
@@ -40,11 +40,11 @@
 ! kop(6) == 1 combinatorial term: Flory term with modified volume (v^2/3)
 ! kop(6) == 2 combinatorial term: None
 !
-! In addition, see Kcalc below to determine if temperature derivative is calculated.
+! In addition, the variable Kcalc determines if temperature derivative is calculated.
 ! 	1 - calculate only gammas
 ! 	2 - calculate only gamma derivative, d(ln gamma)/dT
 !	3 - calculate both gamma and gamma derivative
-! 	The temperature derivative is determined by finite differences in GAMMAPA.F90.
+! 	The temperature derivative is determined by finite differences in SUBROUTINE GAMMA_PA.
 !
 
 ! **************************************************
@@ -260,13 +260,14 @@ character(len=10) :: ver = '0.2TPT1'
 ! todo - track sub and Henry's law components
 ! INTEGER NSUB,  NSUP
 
-INTEGER KOP(10), KCALC, ioErr
+INTEGER KOP(10), KCALC, ioErr, iErr
 real*8 Tkelvin, Pbar
 REAL*8, dimension(:), allocatable :: gamma, dgamma
 REAL*8 gammaPas(*), dgammaPas(*)
 
 
-integer i,j,k,iErr
+! for physical and combinatorial models
+! aparam, bparam for NRTL, Nagata, Wilson, tau for NRTL, Aij for SH
 
 CHARACTER(LEN=255) dumString		! JRE
 LOGICAL LOUDER						! JRE
@@ -407,9 +408,10 @@ implicit none
 ! passed variables
 integer :: start_index, KOP(10)
 ! local variables
-integer ::  i, j, k, ioErr, hostid, nsiteparm, id1, id2, dnrflagmx, acptflagmx, iErr
-character*500 :: data_line
+integer ::  i, j, k, ioErr, iErr, hostid, nsiteparm, id1, id2, dnrflagmx, acptflagmx, linelngth
+character*500 :: data_line, data_out
 character*100 :: data_field, filesites
+character*10 :: frmt
 LOGICAL :: file_exists = .FALSE.
 CHARACTER(LEN=255) dumString		! JRE
 LOGICAL LOUDER						! JRE
@@ -433,26 +435,34 @@ DO WHILE (.NOT. file_exists)
 	print *, 'You entered:', trim(filesites)
 	filesites = 'Input\GAMMAPA\'//filesites
 	INQUIRE(FILE=trim(filesites), EXIST=file_exists)
-	IF(.NOT. file_exists) print *, 'That file is not found. Check folder and spelling.'
+	IF(.NOT. file_exists) print *, '**That file is not found. Check folder and spelling.**'
 	print *, ' '
-	IF(file_exists)OPEN(UNIT=1001, ioStat = ioErr, FILE=filesites)
-	if (ioErr.ne.0) then
-		print *, 'Could not open sites file. Error Code = ', ioErr
-	else
-		print *, 'Sites file opened successfully.'
-	end if
 END DO
 
-WRITE(outfile,*) 'Pure/Assoc file: '//trim(filesites)
-
+WRITE(outfile,'(A)') 'Pure/Assoc file: '//trim(filesites)
+OPEN(UNIT=1001, ioStat = ioErr, FILE=trim(filesites))
+if (ioErr.ne.0) then
+	print *, '**Could not open sites file. Error Code = ', ioErr, '**'
+else
+	print *, 'Sites file opened successfully.'
+end if
 READ(UNIT=1001, END=106, FMT='(A)') data_line ! title
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 READ(UNIT=1001, END=106, FMT='(A)') data_line ! KOP
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 start_index = 1
 do i=1,10
     call parse_line(start_index,data_line,data_field)
     read(data_field,*) kop(i)
 end do
 READ(UNIT=1001, END=106, FMT='(A)') data_line ! title with nc
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 start_index = 1
 call parse_line(start_index,data_line,data_field)
 read(data_field,*) nc
@@ -467,10 +477,16 @@ if(.not.allocated(PCSAFT_epsok)) allocate(PCSAFT_epsok(nc))
 if(.not.allocated(veq)) allocate(veq(nc))
 if(.not.allocated(vparms)) allocate(vparms(7,nc))
 READ(UNIT=1001, END=106, FMT='(A)') data_line ! title
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 
 ! read component information
 do i = 1, nc
     READ(UNIT=1001, END=106, FMT='(A)') data_line
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
     start_index = 1
     call parse_line(start_index,data_line,data_field)
     read(data_field,*) comp(i)%id
@@ -511,14 +527,23 @@ end do ! nc
 
 ! Read site information
 READ(UNIT=1001, END=106, FMT='(A)') data_line ! Header for sites
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 start_index = 1
 call parse_line(start_index,data_line,data_field)
 read(data_field,*) nsites
 if(.not.allocated(site)) allocate(site(nsites))
 READ(UNIT=1001, END=106, FMT='(A)') data_line ! Header line
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 
 do i = 1, nsites
     READ(UNIT=1001, END=106, FMT='(A)') data_line
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
     start_index = 1
     ! The %packed index provides a method to read in more sites that are present in
     ! a function call. In that case the index should be set for the function call.
@@ -553,6 +578,9 @@ end do ! site assigments
 ! Read site parameters
 
 READ(UNIT=1001, END=106, FMT='(A)') data_line ! header for site params
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 start_index = 1
 call parse_line(start_index,data_line,data_field)
 read(data_field,*) nsiteparm
@@ -563,9 +591,15 @@ KAD = reshape( (/ (0D0, k=1, nsites*nsites) /), [nsites,nsites])
 eps = reshape( (/ (0D0, k=1, nsites*nsites) /), [nsites,nsites])
 
 READ(UNIT=1001, END=106, FMT='(A)') data_line ! header for site parms
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 
 DO i = 1, nsiteparm
     READ(UNIT=1001, END=106, FMT='(A)') data_line
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
     start_index = 1
     call parse_line(start_index,data_line,data_field)
     read(data_field,*) id1
@@ -626,10 +660,10 @@ USE GPA_PHYS_PARMS, ONLY: aparam, bparam, alpha
 integer :: start_index, npair, index1, index2, compid1, compid2
 
 ! local variables
-integer :: i, j, id1, id2, ioErr,iErr
+integer :: i, j, id1, id2, ioErr, iErr, linelngth
 character*500 :: data_line
-character*100 :: data_field
-character*100 :: filenrtl
+character*100 :: data_field, filenrtl
+character*10 :: frmt
 LOGICAL :: file_exists = .FALSE.
 CHARACTER(LEN=255) dumString		! JRE
 LOGICAL LOUDER						! JRE
@@ -653,7 +687,7 @@ DO WHILE (.NOT. file_exists)
 	print *, 'You entered:', trim(filenrtl)
 	filenrtl = 'Input\GAMMAPA\'//filenrtl
 	INQUIRE(FILE=trim(filenrtl), EXIST=file_exists)
-	IF(.NOT. file_exists) print *, 'That file is not found. Check folder and spelling.'
+	IF(.NOT. file_exists) print *, '**That file is not found. Check folder and spelling.**'
 	print *, ' '
 	OPEN(UNIT=1001, ioStat = ioErr, FILE=trim(filenrtl))
 	if (ioErr.ne.0) then
@@ -663,16 +697,31 @@ DO WHILE (.NOT. file_exists)
 	end if
 END DO
 
-WRITE(outfile,*) 'NRTL file: '//trim(filenrtl)
+WRITE(outfile,'(A)') 'NRTL file: '//trim(filenrtl)
+OPEN(UNIT=1001, ioStat = ioErr, FILE=trim(filenrtl))
+if (ioErr.ne.0) then
+	print *, '**Could not open NRTL file. Error Code = ', ioErr, '**'
+else
+	print *, 'NRTL file opened successfully.'
+end if
 start_index = 1
 READ(UNIT=1001, END=106, FMT='(A)') data_line
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 call parse_line(start_index,data_line,data_field)
 read(data_field,*) npair
 READ(UNIT=1001, END=106, FMT='(A)') data_line ! Header
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 
 DO i = 1, npair
 	start_index = 1
 	READ(UNIT=1001, END=106, FMT='(A)') data_line
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 	call parse_line(start_index,data_line,data_field) !pairid
 	call parse_line(start_index,data_line,data_field) !id1
 	read(data_field,*) compid1
@@ -715,13 +764,13 @@ use GPA_CONSTANTS, only: outfile
 use GPA_SITENSPECIES, only: comp, nc
 USE GPA_PHYS_PARMS, ONLY: aparam, bparam
 
-integer :: start_index, npair, index1, index2, compid1, compid2
+integer :: start_index, npair, index1, index2, compid1, compid2, linelngth
 
 ! local variables
 integer :: i, j, id1, id2, ioErr
 character*500 :: data_line
-character*100 :: data_field
-character*100 :: filewilson
+character*100 :: data_field, filewilson
+character*10 :: frmt
 LOGICAL :: file_exists = .FALSE.
 
 DO WHILE (.NOT. file_exists)
@@ -730,27 +779,36 @@ DO WHILE (.NOT. file_exists)
 	print *, 'You entered:', trim(filewilson)
 	filewilson = 'Input\GAMMAPA\'//filewilson
 	INQUIRE(FILE=trim(filewilson), EXIST=file_exists)
-	IF(.NOT. file_exists) print *, 'That file is not found. Check folder and spelling.'
+	IF(.NOT. file_exists) print *, '**That file is not found. Check folder and spelling.**'
 	print *, ' '
 END DO
 
 WRITE(outfile,*) 'Wilson file: '//trim(filewilson)
 OPEN(UNIT=1001, ioStat = ioErr, FILE=trim(filewilson))
 if (ioErr.ne.0) then
-	print *, 'Could not open WILSON file. Error Code = ', ioErr
+	print *, '**Could not open WILSON file. Error Code = ', ioErr, '**'
 else
 	print *, 'WILSON file opened successfully.'
 end if
 
 start_index = 1
 READ(UNIT=1001, END=106, FMT='(A)') data_line
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 call parse_line(start_index,data_line,data_field)
 read(data_field,*) npair
 READ(UNIT=1001, END=106, FMT='(A)') data_line ! Header
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 
 DO i = 1, npair
 	start_index = 1
 	READ(UNIT=1001, END=106, FMT='(A)') data_line
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 	call parse_line(start_index,data_line,data_field) !pairid
 	call parse_line(start_index,data_line,data_field) !id1
 	read(data_field,*) compid1
@@ -790,13 +848,13 @@ use GPA_CONSTANTS, only: outfile
 use GPA_SITENSPECIES, only: comp, nc
 USE GPA_PHYS_PARMS, ONLY: aparam, bparam
 
-integer :: start_index, npair, index1, index2, compid1, compid2
+integer :: start_index, npair, index1, index2, compid1, compid2, linelngth
 
 ! local variables
 integer :: i, j, id1, id2, ioErr
 character*500 :: data_line
-character*100 :: data_field
-character*100 :: filesh
+character*100 :: data_field, filesh
+character*10 :: frmt
 LOGICAL :: file_exists = .FALSE.
 
 DO WHILE (.NOT. file_exists)
@@ -805,26 +863,35 @@ DO WHILE (.NOT. file_exists)
 	print *, 'You entered:', trim(filesh)
 	filesh = 'Input\GAMMAPA\'//filesh
 	INQUIRE(FILE=trim(filesh), EXIST=file_exists)
-	IF(.NOT. file_exists) print *, 'That file is not found. Check folder and spelling.'
+	IF(.NOT. file_exists) print *, '**That file is not found. Check folder and spelling.**'
 	print *, ' '
 END DO
 
 WRITE(outfile,*) 'Scatchard-Hildebrand file: '//trim(filesh)
 OPEN(UNIT=1001, ioStat = ioErr, FILE=trim(filesh))
 if (ioErr.ne.0) then
-	print *, 'Could not open Scatchard-Hildebrand file. Error Code = ', ioErr
+	print *, '**Could not open Scatchard-Hildebrand file. Error Code = ', ioErr, '**'
 else
 	print *, 'Scatchard-Hildebrand file opened successfully.'
 end if
 start_index = 1
 READ(UNIT=1001, END=106, FMT='(A)') data_line
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 call parse_line(start_index,data_line,data_field)
 read(data_field,*) npair
 READ(UNIT=1001, END=106, FMT='(A)') data_line ! Header
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 
 DO i = 1, npair
 	start_index = 1
 	READ(UNIT=1001, END=106, FMT='(A)') data_line
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 	call parse_line(start_index,data_line,data_field) !pairid
 	call parse_line(start_index,data_line,data_field) !id1
 	read(data_field,*) compid1
@@ -864,13 +931,13 @@ use GPA_CONSTANTS, only: outfile
 use GPA_SITENSPECIES, only: comp, nc
 USE GPA_PHYS_PARMS, ONLY: aparam, bparam
 
-integer :: start_index, npair, index1, index2, compid1, compid2
+integer :: start_index, npair, index1, index2, compid1, compid2, linelngth
 
 ! local variables
 integer :: i, j, id1, id2, ioErr
 character*500 :: data_line
-character*100 :: data_field
-character*100 :: filenagata
+character*100 :: data_field, filenagata
+character*10 :: frmt
 LOGICAL :: file_exists = .FALSE.
 
 DO WHILE (.NOT. file_exists)
@@ -879,26 +946,35 @@ DO WHILE (.NOT. file_exists)
 	print *, 'You entered:', trim(filenagata)
 	filenagata = 'Input\GAMMAPA\'//filenagata
 	INQUIRE(FILE=trim(filenagata), EXIST=file_exists)
-	IF(.NOT. file_exists) print *, 'That file is not found. Check folder and spelling.'
+	IF(.NOT. file_exists) print *, '**That file is not found. Check folder and spelling.**'
 	print *, ' '
 END DO
 
 WRITE(outfile,*) 'Nagata file: '//trim(filenagata)
 OPEN(UNIT=1001, ioStat = ioErr, FILE=trim(filenagata))
 if (ioErr.ne.0) then
-	print *, 'Could not open Nagata file. Error Code = ', ioErr
+	print *, '**Could not open Nagata file. Error Code = ', ioErr, '**'
 else
 	print *, 'Nagata file opened successfully.'
 end if
 start_index = 1
 READ(UNIT=1001, END=106, FMT='(A)') data_line
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 call parse_line(start_index,data_line,data_field)
 read(data_field,*) npair
 READ(UNIT=1001, END=106, FMT='(A)') data_line ! Header
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 
 DO i = 1, npair
 	start_index = 1
 	READ(UNIT=1001, END=106, FMT='(A)') data_line
+	linelngth = LEN_TRIM(data_line)
+	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
+	WRITE(outfile, frmt) trim(data_line)
 	call parse_line(start_index,data_line,data_field) !pairid
 	call parse_line(start_index,data_line,data_field) !id1
 	read(data_field,*) compid1
@@ -1085,8 +1161,8 @@ select case (kop(4))
         enddo ! i
 		if(kcalc .gt. 1) then ! todo implement wilson
 		    ! calculate upper and lower values for T-derivative
-            ! call wilson(dgammares, nc, x, VratioU*dexp(aparam+bparam/(T+delT/2D0)))
-            ! call wilson(dgammaresd, nc, x, VratioD*dexp(aparam+bparam/(T-delT/2D0)))
+            call wilson(dgammares, nc, x, VratioU*dexp(aparam+bparam/(T+delT/2D0)))
+            call wilson(dgammaresd, nc, x, VratioD*dexp(aparam+bparam/(T-delT/2D0)))
             dgammares=(dgammares-dgammaresd)/delT
         endif ! kcalc > 1
         if( MOD(kcalc,2) .gt. 0) then ! kcalc is odd
@@ -1095,14 +1171,14 @@ select case (kop(4))
                 write(debugfile,*) ' *** GMUwilson Physical Lambda'
                 write(debugfile,'(6G12.5)') Lambda
             endif
-            ! call wilson(gammares, n, x, Lambda)
+            call wilson(gammares, nc, x, Lambda)
         endif ! kcalc is odd
 
-    case (2) !scatchard hildebrand (eqn Elliott/Lira 12.24,12.25) todo implement SH
+    case (2) !scatchard hildebrand (eqn Elliott/Lira 12.24,12.25)
         if(kcalc .gt. 1) then
 		    ! calculate upper and lower values for T-derivative
-            ! call scathild(dgammares, x, VU, nc, aparam*(T + delT/2D0)+bparam,R, T + delT/2D0)
-            ! call scathild(dgammaresd, x, VD, nc, aparam*(T - delT/2D0)+bparam,R, T - delT/2D0)
+            call scathild(dgammares, x, VU, nc, aparam*(T + delT/2D0)+bparam,R, T + delT/2D0)
+            call scathild(dgammaresd, x, VD, nc, aparam*(T - delT/2D0)+bparam,R, T - delT/2D0)
             dgammares = (dgammares - dgammaresd)/delT
         endif ! kcalc < 1
         if (MOD(kcalc,2) .gt. 0) then !kcalc is odd
@@ -1111,14 +1187,14 @@ select case (kop(4))
                 write(debugfile,*) ' *** GMUscathild Physical AIJ'
                 write(debugfile,'(6G12.5)') AIJ
             endif
-            ! call scathild(gammares, x, V, nc, Aij, R, T)
+            call scathild(gammares, x, V, nc, Aij, R, T)
         endif ! kcalc is odd
 
 	case (3) ! Nagata1 todo implement Nagata
         if (kcalc .gt. 1) then
 		    ! calculate upper and lower values for T-derivative
-            ! call nagata1(dgammares, nc, x, VU, aparam + bparam/(T + delT/2D0))
-            ! call nagata1(dgammaresd, nc, x, VD, aparam + bparam/(T - delT/2D0))
+            call nagata1(dgammares, nc, x, VU, aparam + bparam/(T + delT/2D0))
+            call nagata1(dgammaresd, nc, x, VD, aparam + bparam/(T - delT/2D0))
             dgammares = (dgammares - dgammaresd)/delT
 			WRITE(debugfile,*) 'Calculating temperature derivative of residual'
         endif
@@ -1127,8 +1203,7 @@ select case (kop(4))
                 write(debugfile,*) ' *** GMUnagata Physical aij + bij/T'
                 write(debugfile,'(6G12.5)') aparam + bparam/T
             endif
-            ! call nagata1(gammares, n, x, r_uniquac, aparam)
-            ! call nagata1(gammares, n, x, V, aparam + bparam/T)
+            call nagata1(gammares, nc, x, V, aparam + bparam/T)
         endif
 
 end select
@@ -2106,7 +2181,7 @@ phi = (reshape(x,shape(phi))*reshape(V,shape(phi)))/Vmix
 term1 = 0.5D0 * matmul(phi,matmul(Aij,transpose(phi)));
 term2 = transpose(matmul(Aij,transpose(phi)));
 RTlnGamma = reshape(V,shape(phi))*(term2-term1(1,1));
-! gamma is actually ln(gamma) for aspens
+! gamma is actually ln(gamma)
 gamma = reshape((RTlnGamma/R/T),shape(gamma));
 return
 
