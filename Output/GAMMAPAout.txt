@@ -1,5 +1,0 @@
-Kcalc   1
-T(K) P(bar)    298.000     1.000
- Pure/Assoc file: c:\MDNAproject\input\ParmsGpaPUREvdw.txt
- NRTL file: c:\MDNAproject\input\ParmsGpaNRTLvdw.txt
-Gammas are not calculated when Kcalc = 2
