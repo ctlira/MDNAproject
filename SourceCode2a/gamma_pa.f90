@@ -65,7 +65,7 @@ MODULE GPA_CONSTANTS
 	INTEGER, PARAMETER :: debugfile = 2001 ! unit for debug file output
 	! Units 10, 11, 12 are used for gamma.csv, hxs.csv, vol.csv respectively, within code
 	CHARACTER(4), PARAMETER :: missing = '1D35'
-	CHARACTER(255) GPAdir !When all is working, we may set GPAdir=PGLdir.  
+	CHARACTER(255) GPAdir !When all is working, we may set GPAdir=PGLdir.
 END MODULE GPA_CONSTANTS
 
 MODULE GPA_SITENSPECIES
@@ -127,10 +127,12 @@ END MODULE GPA_PHYS_PARMS
 !
 !***************************************************
 SUBROUTINE FINDINDEX(index,compid)
-
 use GPA_SITENSPECIES, only: nc, comp
+
 integer, intent(in) :: compid
 integer, intent(out) :: index
+integer :: i
+implicit None
 
 do i = 1, nc
  if(comp(i)%id .EQ. compid) EXIT
@@ -244,7 +246,9 @@ end subroutine vlu
 !
 !*********************************************************
 !
-Subroutine GpaCalc(kop, Kcalc, Tkelvin,Pbar, gammaPas, dgammaPas,iErr)
+Module GPAGAMMA
+Contains
+Subroutine GpaCalc(kop, Kcalc, Tkelvin,Pbar, gamma, dgamma,iErr)
 use GPA_CONSTANTS
 ! constants includes the outfile id which should not be used for another file
 use GPA_SITENSPECIES
@@ -260,10 +264,10 @@ character(len=10) :: ver = '0.2TPT1'
 ! todo - track sub and Henry's law components
 ! INTEGER NSUB,  NSUP
 
-INTEGER KOP(10), KCALC, ioErr, iErr
+INTEGER i, j, KOP(10), KCALC, ioErr, iErr
 real*8 Tkelvin, Pbar
 REAL*8, dimension(:), allocatable :: gamma, dgamma
-REAL*8 gammaPas(*), dgammaPas(*)
+! REAL*8 gammaPas(*), dgammaPas(*)
 
 
 ! for physical and combinatorial models
@@ -277,22 +281,20 @@ iErr=0
 call loadsites(KOP,iErr)
 
 ! nc is now known
-IF(.NOT.ALLOCATED(x))allocate(x(nc))
+IF(.NOT.ALLOCATED(x)) THEN
+	allocate(x(nc))
+    x = 0
+ENDIF
 IF(.NOT.ALLOCATED(gamma))allocate(gamma(nc))
 IF(.NOT.ALLOCATED(dgamma))allocate(dgamma(nc))
 IF(.NOT.ALLOCATED(aparam))allocate(aparam(nc,nc))
 IF(.NOT.ALLOCATED(bparam))allocate(bparam(nc,nc))
 IF(.NOT.ALLOCATED(alpha))allocate(alpha(nc,nc))
 IF(.NOT.ALLOCATED(Aij))allocate(Aij(nc,nc))
-DO i = 1, nc
-    x(i) = 0D0
-    DO j = 1, nc
-        aparam(i,j) = 0D0
-        bparam(i,j) = 0D0
-        alpha(i,j) = 0D0
-        Aij(i,j) = 0D0
-    END DO
-END DO
+aparam = 0D0
+bparam = 0D0
+alpha = 0D0
+Aij = 0D0
 
 if(kop(1).gt.0) then
     WRITE(debugfile,"(120('-'))")
@@ -358,28 +360,10 @@ IF (kop(2) .EQ. 3) THEN
 	endif
 ENDIF
 call gamma_pa(kop, Kcalc, Tkelvin,Pbar, gamma, dgamma)
-if(allocated(gamma)) deallocate(gamma)
-if(allocated(dgamma)) deallocate(dgamma)
-if(allocated(aparam)) deallocate(aparam)
-if(allocated(bparam)) deallocate(bparam)
-if(allocated(alpha)) deallocate(alpha)
-if(allocated(Aij)) deallocate(Aij)
-if(allocated(site)) deallocate(site)
-if(allocated(comp)) deallocate(comp)
-if(allocated(x)) deallocate(x)
-if(allocated(KAD)) deallocate(KAD)
-if(allocated(eps)) deallocate(eps)
-if(allocated(PCSAFT_sigma)) deallocate(PCSAFT_sigma)
-if(allocated(PCSAFT_m)) deallocate(PCSAFT_m)
-if(allocated(PCSAFT_epsok)) deallocate(PCSAFT_epsok)
-if(allocated(veq)) deallocate(veq)
-if(allocated(bvol)) deallocate(bvol)
-if(allocated(r_uniquac)) deallocate(r_uniquac)
-if(allocated(q_uniquac)) deallocate(q_uniquac)
-if(allocated(vstd)) deallocate(vstd)
-if(allocated(vparms)) deallocate(vparms)
+
 RETURN
 END SubRoutine GpaCalc
+END Module GPAGAMMA
 !****************************************************************
 
 ! Section 3 continued
@@ -418,34 +402,19 @@ LOGICAL LOUDER						! JRE
 LOUDER=.TRUE.						! JRE
 iErr=0
 ! Prepare for output
-filesites=TRIM(GPAdir)//"input\ParmsGpaPUREvdw.txt"		! JRE
+filesites=TRIM(GPAdir)//"input\ParmsGpaAssoc.txt"
 OPEN(1001, ioStat=ioErr, file=filesites)
 if (ioErr.ne.0) then
-	if(LOUDER)print *, 'Could not open input\ParmsGpaPUREvdw.txt. Error Code = ', ioErr
+	if(LOUDER)print *, 'Could not open input\ParmsGpaAssoc.txt. Error Code = ', ioErr
 	iErr=ioErr
 	return
 else
-	if(LOUDER)print *, 'File input\ParmsGpaPUREvdw.txt opened successfully.'
+	if(LOUDER)print *, 'File input\ParmsGpaAssoc.txt opened successfully.'
     file_exists=.TRUE.
 end if
 
-DO WHILE (.NOT. file_exists)
-    print *, 'Enter a the name of the tab-delimited sites input file:'
-	read(*,'(A)') filesites
-	print *, 'You entered:', trim(filesites)
-	filesites = 'Input\GAMMAPA\'//filesites
-	INQUIRE(FILE=trim(filesites), EXIST=file_exists)
-	IF(.NOT. file_exists) print *, '**That file is not found. Check folder and spelling.**'
-	print *, ' '
-END DO
-
 WRITE(outfile,'(A)') 'Pure/Assoc file: '//trim(filesites)
-OPEN(UNIT=1001, ioStat = ioErr, FILE=trim(filesites))
-if (ioErr.ne.0) then
-	print *, '**Could not open sites file. Error Code = ', ioErr, '**'
-else
-	print *, 'Sites file opened successfully.'
-end if
+
 READ(UNIT=1001, END=106, FMT='(A)') data_line ! title
 	linelngth = LEN_TRIM(data_line)
 	WRITE(frmt,'(A,I0,A)') '(A', linelngth, ')'
@@ -670,40 +639,19 @@ LOGICAL LOUDER						! JRE
 LOUDER=.TRUE.						! JRE
 iErr=0
 ! Prepare for output
-filenrtl=TRIM(GPAdir)//"input\ParmsGpaNRTLvdw.txt"		! JRE
+filenrtl=TRIM(GPAdir)//"input\ParmsGpaNRTL.txt"		! JRE
 OPEN(1001, ioStat=ioErr, file=filenrtl)
 if (ioErr.ne.0) then
-	if(LOUDER)print *, 'Could not open input\ParmsGpaNRTLvdw.txt. Error Code = ', ioErr
+	if(LOUDER)print *, 'Could not open input\ParmsGpaNRTL.txt. Error Code = ', ioErr
 	iErr=ioErr
 	return
 else
-	if(LOUDER)print *, 'File input\ParmsGpaNRTLvdw.txt opened successfully.'
+	if(LOUDER)print *, 'File input\ParmsGpaNRTL.txt opened successfully.'
     file_exists=.TRUE.
 end if
 
-DO WHILE (.NOT. file_exists)
-	print *, 'Enter a the name of the tab-delimited NRTL parameter file:'
-	read(*,'(A)') filenrtl
-	print *, 'You entered:', trim(filenrtl)
-	filenrtl = 'Input\GAMMAPA\'//filenrtl
-	INQUIRE(FILE=trim(filenrtl), EXIST=file_exists)
-	IF(.NOT. file_exists) print *, '**That file is not found. Check folder and spelling.**'
-	print *, ' '
-	OPEN(UNIT=1001, ioStat = ioErr, FILE=trim(filenrtl))
-	if (ioErr.ne.0) then
-		print *, 'Could not open NRTL file. Error Code = ', ioErr
-	else
-		print *, 'NRTL file opened successfully.'
-	end if
-END DO
-
 WRITE(outfile,'(A)') 'NRTL file: '//trim(filenrtl)
-OPEN(UNIT=1001, ioStat = ioErr, FILE=trim(filenrtl))
-if (ioErr.ne.0) then
-	print *, '**Could not open NRTL file. Error Code = ', ioErr, '**'
-else
-	print *, 'NRTL file opened successfully.'
-end if
+
 start_index = 1
 READ(UNIT=1001, END=106, FMT='(A)') data_line
 	linelngth = LEN_TRIM(data_line)
@@ -1057,17 +1005,17 @@ do i = 1, nc
 enddo
 
 ! these are the ln(gamma) and d(ln(gamma)/dT)
-gamma = (/ (0D0, k=1,nc) /)
-dgamma = (/ (0.D0, k=1,nc) /)  ! this is d(ln gamma)/dT
-gammares = (/ (0D0, k=1,nc) /)
-dgammares = (/ (0D0, k=1,nc) /)
-gammacomb = (/ (0D0, k=1,nc) /)
-dgammacomb = (/ (0D0, k=1,nc) /)
-gammacombcorr = (/ (0D0, k=1,nc) /)
-dgammacombcorr = (/ (0D0, k=1,nc) /)
-gammaw = (/ (0D0, k=1,nc) /)
-dgammaw = (/ (0D0, k=1,nc) /)
-comp%x = (/ (x(k), k=1,nc) /)
+gamma = 0D0
+dgamma = 0D0  ! this is d(ln gamma)/dT
+gammares = 0D0
+dgammares = 0D0
+gammacomb = 0D0
+dgammacomb = 0D0
+gammacombcorr = 0D0
+dgammacombcorr = 0D0
+gammaw = 0D0
+dgammaw = 0D0
+comp%x = x
 
 ! set site mole fractions
 DO k = 1, nsites

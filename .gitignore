@@ -1,5 +1,6 @@
 *Debug/
 *Release/
+/Output/
 *.i90
 *.obj
 *.suo

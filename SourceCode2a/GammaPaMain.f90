@@ -16,6 +16,7 @@ use GPA_CONSTANTS
 use GPA_SITENSPECIES
 use GPA_VOLUMES
 USE GPA_PHYS_PARMS
+USE GPAGAMMA
 
 IMPLICIT NONE
 
@@ -29,7 +30,7 @@ character(len=10) :: ver = '0.2TPT1'
 INTEGER KOP(10), KCALC, ioErr
 real*8 Tkelvin, Pbar
 REAL*8, dimension(:), allocatable :: gamma, dgamma
-REAL*8 gammaPas(55), dgammaPas(55)
+! REAL*8 gammaPas(55), dgammaPas(55)
 character(255) dumString
 integer i,j,k,iErr
 LOGICAL :: LOUDER = .TRUE.
@@ -42,6 +43,8 @@ iErr=0
 print *, 'Welcome to the GAMMAPA program.'
 print *, ' '
 GPAdir='c:\MDNAproject\'			! JRE
+GPAdir=''			! CTL
+
 
 ! for physical and combinatorial models
 ! aparam, bparam for NRTL, Nagata, Wilson, tau for NRTL, Aij for SH
@@ -69,8 +72,8 @@ if(iErr.NE.0)pause 'GammaPaMain: errors at program startup. Recommend you stop a
 print *, 'Output will be written to:',TRIM(dumString)
 print *, ' '
 print *, ' '
-print *, 'You will be prompted for the file names of the two input files.'
-print *, 'The files should reside in the folder <project>/Input/GAMMAPA.'
+print *, 'The input files ParmsGpaAssoc.txt and ParmsGpaNRTL.txt should reside'
+print *, 'in the folder <project>/Input.'
 print *, ' '
 
 print *, 'Enter the Temperature(K) and Pressure (bar)'
@@ -125,15 +128,17 @@ write(outfile, '(A, 2F10.3)') 'T(K) P(bar) ', Tkelvin,Pbar
 !***********CaseStudy2i,v,ix***************
 !*****CaseStudy2iCPA-assoc.txt, CaseStudy2iCPA-nrtl.txt*****
 !*****CaseStudy2iPCS-assoc.txt, CaseStudy2iPCS-nrtl.txt*****
+allocate(x(7))
+x = 0D0
 x = (/ 0.05D0, 0.0D0, 0.25D0, 0.2D0, 0.05D0, 0.019D0, 0.431D0 /) ! Case 2v
 x = (/ 0.25D0, 0.1D0, 0.05D0, 0.1D0, 0.15D0, 0.2D0, 0.15D0 /) ! Case 2ix
 x = (/ 0.05D0, 0.075D0, 0.3D0, 0.2D0, 0.1D0, 0.01D0, 0.265D0 /) ! Case 2i
 !call gamma_pa(kop, Kcalc, Tkelvin,Pbar, gamma, dgamma)
-Call GpaCalc(kop, Kcalc, Tkelvin,Pbar, gammaPas, dgammaPas,iErr)
+Call GpaCalc(kop, Kcalc, Tkelvin,Pbar, gamma, dgamma,iErr)
 write(outfile,'(A)') 'Gammas are not calculated when Kcalc = 2'
-write(outfile, '(A5,7F15.6,/,A5,7F15.6,/,A5,7F15.6,/)') 'x', X(:), 'ln(g)', gammaPas(1:nc), 'g', dexp(gammaPas(1:nc))
+write(outfile, '(A5,7F15.6,/,A5,7F15.6,/,A5,7F15.6,/)') 'x', X(:), 'ln(g)', gamma(:), 'g', dexp(gamma(:))
 write(outfile,'(A)') 'Hxs is not calculated if Kcalc = 1'
-write(outfile,'(A10, F15.6)') 'Hxs(J/mol)', -R*Tkelvin**2*(dot_product(x,dgammaPas))
+write(outfile,'(A10, F15.6)') 'Hxs(J/mol)', -R*Tkelvin**2*(dot_product(x,dgamma))
 !*********** end CaseStudy2i,v,ix***************
 
 close(outfile)
@@ -142,5 +147,24 @@ close(debugfile)
 print *, 'Program has ended normally. The output is in Output/GAMMAPAout.txt.'
 print *, 'Press any key to close this window.'
 pause
-
+if(allocated(gamma)) deallocate(gamma)
+if(allocated(dgamma)) deallocate(dgamma)
+if(allocated(aparam)) deallocate(aparam)
+if(allocated(bparam)) deallocate(bparam)
+if(allocated(alpha)) deallocate(alpha)
+if(allocated(Aij)) deallocate(Aij)
+if(allocated(site)) deallocate(site)
+if(allocated(comp)) deallocate(comp)
+if(allocated(x)) deallocate(x)
+if(allocated(KAD)) deallocate(KAD)
+if(allocated(eps)) deallocate(eps)
+if(allocated(PCSAFT_sigma)) deallocate(PCSAFT_sigma)
+if(allocated(PCSAFT_m)) deallocate(PCSAFT_m)
+if(allocated(PCSAFT_epsok)) deallocate(PCSAFT_epsok)
+if(allocated(veq)) deallocate(veq)
+if(allocated(bvol)) deallocate(bvol)
+if(allocated(r_uniquac)) deallocate(r_uniquac)
+if(allocated(q_uniquac)) deallocate(q_uniquac)
+if(allocated(vstd)) deallocate(vstd)
+if(allocated(vparms)) deallocate(vparms)
 END PROGRAM GAMMAPA_MAIN
