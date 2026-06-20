@@ -207,7 +207,7 @@ end
     if(ioErr /= 0)iErrCode=11
 	!if(ioErr==0)READ(dumString,*,ioStat=ioErr)NDECK1
     !if(ioErr /=0)
-    NDECK1=nCritSet+123 !if header omits the number of records(e.g. for python benefit), we recover...
+    NDECK1=nCritSet+1234 !if header omits the number of records(e.g. for python benefit), we recover...
 	DO I=1,NDECK1 !Loading the entire CritDB into RAM
 		!NOTE: Can NOT read dumString here b/c unformatted read from dumString is not allowed.
 		!if(i.eq.691)write(dumpUnit,*)
@@ -246,7 +246,7 @@ end
 	enddo
 	errMsgPas=errMsg(iErrCode)
 	if(NDECK1 /= nCritSet)then
-		if(LOUDER)print*,'nDeckJaubert,nCritSet=',NDECK1,nCritSet
+		if(LOUDER)print*,'LoadCritParmsDb:nDeckJaubert,nCritSet=',NDECK1,nCritSet
 		iErrCode=12
         return
     endif
@@ -472,7 +472,7 @@ end
 		do jComp=iComp+1,NC
 			idBin=10000*idComp(iComp)+idComp(jComp)
 			switched=.FALSE.
-			if(idComp(iComp).lt.idComp(jComp))then
+			if(idComp(iComp) < idComp(jComp))then
 				switched=.TRUE.
 				idBin=10000*idComp(jComp)+idComp(iComp)
 			endif
@@ -1014,3 +1014,18 @@ DOUBLE PRECISION FUNCTION SumSq(N,X)
 !C
       END
 
+FUNCTION ToUpper(string) RESULT(upper)
+  IMPLICIT NONE
+  CHARACTER(LEN=5), INTENT(IN) :: string
+  CHARACTER(LEN=5) :: upper
+  INTEGER :: i, ich
+
+  upper = string
+  DO i = 1, LEN(string)
+     ich = ICHAR(string(i:i))
+     ! lowercase a–z are ASCII 97–122
+     IF (ich >= ICHAR('a') .AND. ich <= ICHAR('z')) THEN
+        upper(i:i) = CHAR(ich - 32)
+     END IF
+  END DO
+END FUNCTION ToUpper
