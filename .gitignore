@@ -7,5 +7,9 @@
 *.u2d
 *.user
 *.mod
-*genmod.f90
+*_genmod.f90
+*_genmod.smod
+scan-output*
 PGLDll.dll
+out/
+.vs/

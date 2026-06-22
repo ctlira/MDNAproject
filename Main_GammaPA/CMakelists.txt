@@ -1,0 +1,51 @@
+# ---------------------------------------------------------
+# GammaPA — Shared library (template)
+# ---------------------------------------------------------
+
+# --- Explicit ordered source lists (order matters) ----------------------------
+
+# Replace these with your actual GammaPA source files
+set(SRC_GAMMAPA
+    GammaPA_Main.f90
+    GammaPA_Module1.f90
+    GammaPA_Module2.f90
+    # Add more files here in the correct module order
+)
+
+# If GammaPA depends on shared UA or 2A code, add them here:
+# set(SRC_UA
+#     ../SourceCodeUA/ModuleUAData.f90
+#     ../SourceCodeUA/PGLFugiDefs.f90
+#     ...
+# )
+
+# set(SRC_2A
+#     ../SourceCode2a/PcSaftEosGross.f90
+#     ../SourceCode2a/PrLorraine.f90
+# )
+
+# --- Target -------------------------------------------------------------------
+
+add_library(GammaPA SHARED
+    ${SRC_GAMMAPA}
+    # ${SRC_UA}
+    # ${SRC_2A}
+)
+
+# --- Intel Fortran flags (same as Main_PGLdll) --------------------------------
+
+if(CMAKE_Fortran_COMPILER_ID MATCHES "Intel|IntelLLVM")
+    target_compile_options(GammaPA PRIVATE
+        /warn:all
+        /Qdiag-error-limit:5
+        /stand:f18
+    )
+endif()
+
+# --- Fixed-form handling for .for and .f files --------------------------------
+
+foreach(src ${SRC_GAMMAPA})
+    if(src MATCHES "\\.(for|f)$")
+        set_source_files_properties(${src} PROPERTIES COMPILE_OPTIONS "/fixed")
+    endif()
+endforeach()
