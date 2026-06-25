@@ -40,7 +40,7 @@ set(SRC_MIN
 set(SRC_LOCAL
     MainMenu2d.f90
     MenuItems2c.f90
-)	
+)
 
 # --- Target -------------------------------------------------------------------
 

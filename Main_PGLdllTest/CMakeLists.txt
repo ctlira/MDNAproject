@@ -18,8 +18,8 @@ target_link_libraries(PGLdllTest PRIVATE PGLdll)
 
 # --- Include PGLdll module directory ---------------------------------------
 
-# Modern CMake Note: If PGLdll defines Fortran_MODULE_DIRECTORY, 
-# target_link_libraries often propagates this automatically, 
+# Modern CMake Note: If PGLdll defines Fortran_MODULE_DIRECTORY,
+# target_link_libraries often propagates this automatically,
 # but keeping this explicit ensures Ninja knows exactly where to look.
 target_include_directories(PGLdllTest PRIVATE
     $<TARGET_PROPERTY:PGLdll,Fortran_MODULE_DIRECTORY>
