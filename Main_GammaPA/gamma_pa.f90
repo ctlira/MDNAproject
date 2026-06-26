@@ -60,7 +60,7 @@
 ! *******************************************************
 
 MODULE GPA_CONSTANTS
-	REAL*8, PARAMETER :: avoNum = 602.214076d0, kB = 0.01380649D0, R = avoNum*kB
+	REAL*8, PARAMETER :: avoNum = 602.214076d0, kB = 0.01380649D0, Rgas = avoNum*kB
 	INTEGER, PARAMETER :: outfile = 2000 ! unit number for regular output
 	INTEGER, PARAMETER :: debugfile = 2001 ! unit for debug file output
 	! Units 10, 11, 12 are used for gamma.csv, hxs.csv, vol.csv respectively, within code
@@ -128,11 +128,11 @@ END MODULE GPA_PHYS_PARMS
 !***************************************************
 SUBROUTINE FINDINDEX(index,compid)
 use GPA_SITENSPECIES, only: nc, comp
+implicit None
 
 integer, intent(in) :: compid
 integer, intent(out) :: index
 integer :: i
-implicit None
 
 do i = 1, nc
  if(comp(i)%id .EQ. compid) EXIT
@@ -203,7 +203,7 @@ intent(in)::IDI, T, VEQN, DNLDIP
 ! Outside the limits, the values are adjust to the limit values.
 
 
-integer I,IDI,VEQN, LTC, IPROG
+integer IDI,VEQN
 real*8 V, T, TC, T1, DNLDIP(7), TAU
 T1 = T ! Assign value for calculation that is not returned if changed
 if (T.gt.DNLDIP(7)) T1 = DNLDIP(7)
@@ -230,144 +230,13 @@ end subroutine vlu
 !
 !  Section 1 - Modules
 !  Section 2 - Utility and property routines
-!  ** Section 3 - Main routine and load parameters
+!  ** Section 3 - load parameters
 !  Section 4 - Gamma_PA routine that calls for Wertheim and Physical Models and combines them
 !  Section 5 - Wertheim contribution Code and subroutines
 !  Section 6 - Physical Models
 !  Section 7 - Combinatorial Models and Combinatorial Corrections
 !
 ! *******************************************************
-
-! GpaCalc()
-!
-! main entry point for GAMMA_PA application
-! GetGammaPa loads parameters to gamma_pa
-! where the calculations are executed.
-!
-!*********************************************************
-!
-Module GPAGAMMA
-Contains
-Subroutine GpaCalc(kop, Kcalc, Tkelvin,Pbar, gamma, dgamma,iErr)
-use GPA_CONSTANTS
-! constants includes the outfile id which should not be used for another file
-use GPA_SITENSPECIES
-use GPA_VOLUMES
-USE GPA_PHYS_PARMS
-
-IMPLICIT NONE
-
-! Please update the version when making more than minor fixes
-! Append RTPT or TPT1 so that debug code shows the option used for compiled code.
-character(len=10) :: ver = '0.2TPT1'
-
-! todo - track sub and Henry's law components
-! INTEGER NSUB,  NSUP
-
-INTEGER i, j, KOP(10), KCALC, ioErr, iErr
-real*8 Tkelvin, Pbar
-REAL*8, dimension(:), allocatable :: gamma, dgamma
-! REAL*8 gammaPas(*), dgammaPas(*)
-
-
-! for physical and combinatorial models
-! aparam, bparam for NRTL, Nagata, Wilson, tau for NRTL, Aij for SH
-
-CHARACTER(LEN=255) dumString		! JRE
-LOGICAL LOUDER						! JRE
-LOUDER=.TRUE.						! JRE
-iErr=0
-
-call loadsites(KOP,iErr)
-
-! nc is now known
-IF(.NOT.ALLOCATED(x)) THEN
-	allocate(x(nc))
-    x = 0
-ENDIF
-IF(.NOT.ALLOCATED(gamma))allocate(gamma(nc))
-IF(.NOT.ALLOCATED(dgamma))allocate(dgamma(nc))
-IF(.NOT.ALLOCATED(aparam))allocate(aparam(nc,nc))
-IF(.NOT.ALLOCATED(bparam))allocate(bparam(nc,nc))
-IF(.NOT.ALLOCATED(alpha))allocate(alpha(nc,nc))
-IF(.NOT.ALLOCATED(Aij))allocate(Aij(nc,nc))
-aparam = 0D0
-bparam = 0D0
-alpha = 0D0
-Aij = 0D0
-
-if(kop(1).gt.0) then
-    WRITE(debugfile,"(120('-'))")
-	WRITE(debugfile,'(A,A10)') 'Print debug info. GAMMAPA version ',ver
-	WRITE(debugfile,'(A,10I3)') 'Option codes ', (kop(i),i=1,10)
-    WRITE(debugfile,900) NC
-    WRITE(debugfile,*) '*** Species Identifiers'
-    do i=1,nc
-        WRITE (debugfile, '(3X, I4, 3X, I4, 3X, A20)') i, comp(i)%id, comp(i)%name
-    enddo
-endif
-900  FORMAT('n Species ', I3)
-
-! load physical parameters
-select case (kop(4))
-    case (0)
-        call loadnrtl(iErr)
-        if(kop(1).gt.1) then
-            write(debugfile,*) ' *** GMNRTL Physical aij'
-            write(debugfile,'(6G12.5)') aparam
-            write(debugfile,*) ' *** GMNRTL Physical bij'
-            write(debugfile,'(6G12.5)') bparam
-            write(debugfile,*) ' *** GMNRTL Physical alpha'
-            write(debugfile,'(6G12.5)') alpha
-        endif
-
-    case (1) ! wilson
-        call loadwilson()
-        if(kop(1).gt.1) then
-            write(debugfile,*) ' *** GMUwilson Physical aij'
-            write(debugfile,'(6G12.5)') aparam
-            write(debugfile,*) ' *** GMUwilson Physical bij'
-            write(debugfile,'(6G12.5)') bparam
-        endif
-
-    case (2) !scatchard hildebrand (eqn Elliott/Lira 12.24,12.25)
-        call loadsh()
-        if(kop(1).gt.1) then
-            write(debugfile,*) ' *** GMUscathild Physical aij'
-            write(debugfile,'(6G12.5)') aparam
-            write(debugfile,*) ' *** GMUscathild Physical bij'
-            write(debugfile,'(6G12.5)') bparam
-        endif
-
-	case (3) ! Nagata1
-        call loadnagata()
-        if(kop(1).gt.1) then
-            write(debugfile,*) ' *** GMUnagata Physical aij'
-            write(debugfile,'(6G12.5)') aparam
-            write(debugfile,*) ' *** GMUnagata Physical bij'
-            write(debugfile,'(6G12.5)') bparam
-            write(debugfile,*) ' *** GMUnagata Physical aij + bij/T'
-            write(debugfile,'(6G12.5)') aparam + bparam/Tkelvin
-        endif
-
-end select
-
-IF (kop(2) .EQ. 3) THEN
-	if ((kop(1).gt.1).and.(mod(kcalc,2).gt.0)) then
-        do i = 1, nc
-            write(debugfile,'(I4, 3G12.5)') (i), PCSAFT_m(i), PCSAFT_sigma(i), PCSAFT_epsok(i)
-        enddo
-	endif
-ENDIF
-call gamma_pa(kop, Kcalc, Tkelvin,Pbar, gamma, dgamma)
-
-RETURN
-END SubRoutine GpaCalc
-END Module GPAGAMMA
-!****************************************************************
-
-! Section 3 continued
-
 !****************************************************************************
 !
 !  Subrouting LOADSITES
@@ -393,11 +262,10 @@ implicit none
 integer :: start_index, KOP(10)
 ! local variables
 integer ::  i, j, k, ioErr, iErr, hostid, nsiteparm, id1, id2, dnrflagmx, acptflagmx, linelngth
-character*500 :: data_line, data_out
+character*500 :: data_line
 character*100 :: data_field, filesites
 character*10 :: frmt
 LOGICAL :: file_exists = .FALSE.
-CHARACTER(LEN=255) dumString		! JRE
 LOGICAL LOUDER						! JRE
 LOUDER=.TRUE.						! JRE
 iErr=0
@@ -622,24 +490,22 @@ END SUBROUTINE LOADSITES
 
 SUBROUTINE LOADNRTL(iErr)
 
-use GPA_CONSTANTS !, only: outfile
-use GPA_SITENSPECIES, only: comp, nc
+use GPA_CONSTANTS
 USE GPA_PHYS_PARMS, ONLY: aparam, bparam, alpha
 
 integer :: start_index, npair, index1, index2, compid1, compid2
 
 ! local variables
-integer :: i, j, id1, id2, ioErr, iErr, linelngth
+integer :: i, ioErr, iErr, linelngth
 character*500 :: data_line
 character*100 :: data_field, filenrtl
 character*10 :: frmt
 LOGICAL :: file_exists = .FALSE.
-CHARACTER(LEN=255) dumString		! JRE
-LOGICAL LOUDER						! JRE
-LOUDER=.TRUE.						! JRE
+LOGICAL LOUDER
+LOUDER=.TRUE.
 iErr=0
 ! Prepare for output
-filenrtl=TRIM(GPAdir)//"input\ParmsGpaNRTL.txt"		! JRE
+filenrtl=TRIM(GPAdir)//"input\ParmsGpaNRTL.txt"
 OPEN(1001, ioStat=ioErr, file=filenrtl)
 if (ioErr.ne.0) then
 	if(LOUDER)print *, 'Could not open input\ParmsGpaNRTL.txt. Error Code = ', ioErr
@@ -706,38 +572,35 @@ END SUBROUTINE LOADNRTL
 !
 !**********************************************
 
-SUBROUTINE LOADWILSON()
+SUBROUTINE LOADWILSON(iErr)
 
-use GPA_CONSTANTS, only: outfile
-use GPA_SITENSPECIES, only: comp, nc
+use GPA_CONSTANTS
 USE GPA_PHYS_PARMS, ONLY: aparam, bparam
 
 integer :: start_index, npair, index1, index2, compid1, compid2, linelngth
 
 ! local variables
-integer :: i, j, id1, id2, ioErr
+integer :: i, iErr, ioErr
 character*500 :: data_line
 character*100 :: data_field, filewilson
 character*10 :: frmt
 LOGICAL :: file_exists = .FALSE.
-
-DO WHILE (.NOT. file_exists)
-	print *, 'Enter a the name of the tab-delimited Wilson parameter file:'
-	read(*,'(A)') filewilson
-	print *, 'You entered:', trim(filewilson)
-	filewilson = 'Input\GAMMAPA\'//filewilson
-	INQUIRE(FILE=trim(filewilson), EXIST=file_exists)
-	IF(.NOT. file_exists) print *, '**That file is not found. Check folder and spelling.**'
-	print *, ' '
-END DO
-
-WRITE(outfile,*) 'Wilson file: '//trim(filewilson)
-OPEN(UNIT=1001, ioStat = ioErr, FILE=trim(filewilson))
+LOGICAL LOUDER
+LOUDER=.TRUE.
+iErr=0
+! Prepare for output
+filewilson=TRIM(GPAdir)//"input\ParmsGpaWilson.txt"
+OPEN(1001, ioStat=ioErr, file=filewilson)
 if (ioErr.ne.0) then
-	print *, '**Could not open WILSON file. Error Code = ', ioErr, '**'
+	if(LOUDER)print *, 'Could not open input\ParmsGpaWilson.txt. Error Code = ', ioErr
+	iErr=ioErr
+	return
 else
-	print *, 'WILSON file opened successfully.'
+	if(LOUDER)print *, 'File input\ParmsGpaWilson.txt opened successfully.'
+    file_exists=.TRUE.
 end if
+
+WRITE(outfile,'(A)') 'Wilson file: '//trim(filewilson)
 
 start_index = 1
 READ(UNIT=1001, END=106, FMT='(A)') data_line
@@ -790,38 +653,36 @@ END SUBROUTINE LOADWILSON
 !
 !**********************************************
 
-SUBROUTINE LOADSH()
+SUBROUTINE LOADSH(iErr)
 
-use GPA_CONSTANTS, only: outfile
-use GPA_SITENSPECIES, only: comp, nc
+use GPA_CONSTANTS
 USE GPA_PHYS_PARMS, ONLY: aparam, bparam
 
 integer :: start_index, npair, index1, index2, compid1, compid2, linelngth
 
 ! local variables
-integer :: i, j, id1, id2, ioErr
+integer :: i, iErr, ioErr
 character*500 :: data_line
 character*100 :: data_field, filesh
 character*10 :: frmt
 LOGICAL :: file_exists = .FALSE.
-
-DO WHILE (.NOT. file_exists)
-	print *, 'Enter the name of the tab-delimited Scatchard-Hildebrand parameter file:'
-	read(*,'(A)') filesh
-	print *, 'You entered:', trim(filesh)
-	filesh = 'Input\GAMMAPA\'//filesh
-	INQUIRE(FILE=trim(filesh), EXIST=file_exists)
-	IF(.NOT. file_exists) print *, '**That file is not found. Check folder and spelling.**'
-	print *, ' '
-END DO
+LOGICAL LOUDER
+LOUDER=.TRUE.
+iErr=0
+! Prepare for output
+filesh=TRIM(GPAdir)//"input\ParmsGpaSH.txt"
+OPEN(1001, ioStat=ioErr, file=filesh)
+if (ioErr.ne.0) then
+	if(LOUDER)print *, 'Could not open input\ParmsGpaSH.txt. Error Code = ', ioErr
+	iErr=ioErr
+	return
+else
+	if(LOUDER)print *, 'File input\ParmsGpaSH.txt opened successfully.'
+    file_exists=.TRUE.
+end if
 
 WRITE(outfile,*) 'Scatchard-Hildebrand file: '//trim(filesh)
-OPEN(UNIT=1001, ioStat = ioErr, FILE=trim(filesh))
-if (ioErr.ne.0) then
-	print *, '**Could not open Scatchard-Hildebrand file. Error Code = ', ioErr, '**'
-else
-	print *, 'Scatchard-Hildebrand file opened successfully.'
-end if
+
 start_index = 1
 READ(UNIT=1001, END=106, FMT='(A)') data_line
 	linelngth = LEN_TRIM(data_line)
@@ -873,38 +734,36 @@ END SUBROUTINE LOADSH
 !
 !**********************************************
 
-SUBROUTINE LOADNAGATA()
+SUBROUTINE LOADNAGATA(iErr)
 
-use GPA_CONSTANTS, only: outfile
-use GPA_SITENSPECIES, only: comp, nc
+use GPA_CONSTANTS
 USE GPA_PHYS_PARMS, ONLY: aparam, bparam
 
 integer :: start_index, npair, index1, index2, compid1, compid2, linelngth
 
 ! local variables
-integer :: i, j, id1, id2, ioErr
+integer :: i, iErr, ioErr
 character*500 :: data_line
 character*100 :: data_field, filenagata
 character*10 :: frmt
 LOGICAL :: file_exists = .FALSE.
-
-DO WHILE (.NOT. file_exists)
-	print *, 'Enter a the name of the tab-delimited Nagata parameter file:'
-	read(*,'(A)') filenagata
-	print *, 'You entered:', trim(filenagata)
-	filenagata = 'Input\GAMMAPA\'//filenagata
-	INQUIRE(FILE=trim(filenagata), EXIST=file_exists)
-	IF(.NOT. file_exists) print *, '**That file is not found. Check folder and spelling.**'
-	print *, ' '
-END DO
+LOGICAL LOUDER
+LOUDER=.TRUE.
+iErr=0
+! Prepare for output
+filenagata=TRIM(GPAdir)//"input\ParmsGpaNagata.txt"
+OPEN(1001, ioStat=ioErr, file=filenagata)
+if (ioErr.ne.0) then
+	if(LOUDER)print *, 'Could not open input\ParmsGpaNagata.txt. Error Code = ', ioErr
+	iErr=ioErr
+	return
+else
+	if(LOUDER)print *, 'File input\ParmsGpaNagata.txt opened successfully.'
+    file_exists=.TRUE.
+end if
 
 WRITE(outfile,*) 'Nagata file: '//trim(filenagata)
-OPEN(UNIT=1001, ioStat = ioErr, FILE=trim(filenagata))
-if (ioErr.ne.0) then
-	print *, '**Could not open Nagata file. Error Code = ', ioErr, '**'
-else
-	print *, 'Nagata file opened successfully.'
-end if
+
 start_index = 1
 READ(UNIT=1001, END=106, FMT='(A)') data_line
 	linelngth = LEN_TRIM(data_line)
@@ -968,7 +827,7 @@ END SUBROUTINE LOADNAGATA
 ! derivative of gamma
 !
 !**********************************************************
-SUBROUTINE GAMMA_PA(kop, Kcalc, T, P, gamma, dgamma)
+SUBROUTINE GAMMA_PA(kop, Kcalc, TKelvin, Pbar, gamma, dgamma, iErr)
 
 use GPA_CONSTANTS
 use GPA_SITENSPECIES
@@ -978,20 +837,23 @@ use GPA_PHYS_PARMS
 implicit none
 
 integer, INTENT(IN) :: Kcalc
-real*8, INTENT(IN) :: T, P
-real*8, dimension(nc), INTENT(OUT) :: gamma, dgamma
-
-INTEGER i, j, k, l, kop(10)
+integer, INTENT(INOUT) :: iErr, kop(10)
+! todo iErr exists in the calling function and this may clobber the value
 ! The intent of KOP is input, but the user for certain models inconsistent values
 ! can be specified, so the values can be overwritten below.
+real*8, INTENT(IN) :: TKelvin, Pbar
+real*8, dimension(nc), INTENT(OUT) :: gamma, dgamma
+
+INTEGER i, j, k, l
 REAL*8 delT, rhomix, rhomixu, rhomixd
 real*8, dimension(nc) :: gammares, dgammares, dgammaresd, gammacomb, &
  dgammacomb, dgammacombd, gammacombcorr, dgammacombcorr, dgammacombcorrd
 real*8, dimension(nc) :: gammaw, dgammaw, dgammawd
 real*8, dimension(nc) :: bvdw, VU, VD, V, rho, rhou, rhod
 real*8, dimension(nc, nc) :: tau, Lambda, Vratio, VratioU, VratioD
-! VrationU = volume ratio at T+delT/2
-! VrationD = volume ratio at T-deltT/2
+! VrationU = volume ratio at TKelvin+delT/2
+! VrationD = volume ratio at TKelvin-deltT/2
+iErr = 0
 
 delT = 0.1D0
 
@@ -1030,7 +892,7 @@ if((kop(1).gt.1)) THEN
  write(debugfile,*)'Site1, Site2, index1, index2, Keps, eps, kad'
  do l = 1, nsites
     do k = 1, nsites
-        write(debugfile,'(2A20, 2I4, 3G12.5)') site(l)%name,site(k)%name,l,k,kad(l,k)*(dexp(eps(l,k)/T)-1D0), eps(l,k), kad(l,k)
+        write(debugfile,'(2A20, 2I4, 3G12.5)') site(l)%name,site(k)%name,l,k,kad(l,k)*(dexp(eps(l,k)/TKelvin)-1D0), eps(l,k), kad(l,k)
     enddo !k
  enddo !l
 endif
@@ -1048,13 +910,13 @@ if ((kop(1).gt.1).and.(mod(kcalc,2).gt.0)) write(debugfile,*) 'Component id, vol
 if (kop(3) .gt. 0) then
     if (KCALC .gt. 1) then ! calculate values needed for T derivative
         do i = 1,nc
-            CALL VLU(VU(i),i,VEQ(i),vparms(:,i),T + delT/2D0)
-            CALL VLU(VD(i),i,VEQ(i),vparms(:,i),T - delT/2D0)
+            CALL VLU(VU(i),i,VEQ(i),vparms(:,i),TKelvin + delT/2D0)
+            CALL VLU(VD(i),i,VEQ(i),vparms(:,i),TKelvin - delT/2D0)
         enddo
     endif !kcalc > 1
 	if (MOD(KCALC,2).gt.0) then	! calculate molar volume
         do i = 1,nc
-            CALL VLU(V(i),i,VEQ(i),vparms(:,i),T)
+            CALL VLU(V(i),i,VEQ(i),vparms(:,i),TKelvin)
         enddo
     endif !kcalc is odd
 endif
@@ -1068,7 +930,7 @@ if (kop(1).gt.1) then
         enddo
     endif
     if (kcalc.gt.1) then
-        write(debugfile,*) ' vols at T+-deltT/2 for finite diff'
+        write(debugfile,*) ' vols at TKelvin+-deltT/2 for finite diff'
         do i = 1, nc
             write(debugfile,'(I4, 2G12.5)') i, VU(i), VD(i)
         enddo
@@ -1079,12 +941,12 @@ select case (kop(4))
     case (0)
 		if(kcalc .gt. 1) then
 		    ! calculate upper and lower values for T-derivative
-            call nrtl(dgammares, nc, x, aparam+bparam/(T + delT/2D0), alpha)
-            call nrtl(dgammaresd, nc, x, aparam+bparam/(T - delT/2D0), alpha)
+            call nrtl(dgammares, nc, x, aparam+bparam/(TKelvin + delT/2D0), alpha)
+            call nrtl(dgammaresd, nc, x, aparam+bparam/(TKelvin - delT/2D0), alpha)
             dgammares = (dgammares-dgammaresd)/delT
 		endif ! kcalc > 1
 		if(MOD(kcalc,2) .gt. 0) then ! kcalc is odd
-            tau = aparam+bparam/T
+            tau = aparam+bparam/TKelvin
             if(kop(1).gt.1) then
                 write(debugfile,*) ' *** GMNRTL Physical tau'
                 write(debugfile,'(6G12.5)') tau
@@ -1109,12 +971,12 @@ select case (kop(4))
         enddo ! i
 		if(kcalc .gt. 1) then ! todo implement wilson
 		    ! calculate upper and lower values for T-derivative
-            call wilson(dgammares, nc, x, VratioU*dexp(aparam+bparam/(T+delT/2D0)))
-            call wilson(dgammaresd, nc, x, VratioD*dexp(aparam+bparam/(T-delT/2D0)))
+            call wilson(dgammares, nc, x, VratioU*dexp(aparam+bparam/(TKelvin+delT/2D0)))
+            call wilson(dgammaresd, nc, x, VratioD*dexp(aparam+bparam/(TKelvin-delT/2D0)))
             dgammares=(dgammares-dgammaresd)/delT
         endif ! kcalc > 1
         if( MOD(kcalc,2) .gt. 0) then ! kcalc is odd
-            Lambda = Vratio*dexp(aparam+bparam/T)
+            Lambda = Vratio*dexp(aparam+bparam/TKelvin)
             if(kop(1).gt.1) then
                 write(debugfile,*) ' *** GMUwilson Physical Lambda'
                 write(debugfile,'(6G12.5)') Lambda
@@ -1125,33 +987,33 @@ select case (kop(4))
     case (2) !scatchard hildebrand (eqn Elliott/Lira 12.24,12.25)
         if(kcalc .gt. 1) then
 		    ! calculate upper and lower values for T-derivative
-            call scathild(dgammares, x, VU, nc, aparam*(T + delT/2D0)+bparam,R, T + delT/2D0)
-            call scathild(dgammaresd, x, VD, nc, aparam*(T - delT/2D0)+bparam,R, T - delT/2D0)
+            call scathild(dgammares, x, VU, nc, aparam*(TKelvin + delT/2D0)+bparam,Rgas, TKelvin + delT/2D0)
+            call scathild(dgammaresd, x, VD, nc, aparam*(TKelvin - delT/2D0)+bparam,Rgas, TKelvin - delT/2D0)
             dgammares = (dgammares - dgammaresd)/delT
         endif ! kcalc < 1
         if (MOD(kcalc,2) .gt. 0) then !kcalc is odd
-            Aij = aparam*T+bparam
+            Aij = aparam*TKelvin+bparam
             if(kop(1).gt.1) then
                 write(debugfile,*) ' *** GMUscathild Physical AIJ'
                 write(debugfile,'(6G12.5)') AIJ
             endif
-            call scathild(gammares, x, V, nc, Aij, R, T)
+            call scathild(gammares, x, V, nc, Aij, Rgas, TKelvin)
         endif ! kcalc is odd
 
 	case (3) ! Nagata1 todo implement Nagata
         if (kcalc .gt. 1) then
 		    ! calculate upper and lower values for T-derivative
-            call nagata1(dgammares, nc, x, VU, aparam + bparam/(T + delT/2D0))
-            call nagata1(dgammaresd, nc, x, VD, aparam + bparam/(T - delT/2D0))
+            call nagata1(dgammares, nc, x, VU, aparam + bparam/(TKelvin + delT/2D0))
+            call nagata1(dgammaresd, nc, x, VD, aparam + bparam/(TKelvin - delT/2D0))
             dgammares = (dgammares - dgammaresd)/delT
 			WRITE(debugfile,*) 'Calculating temperature derivative of residual'
         endif
         if (MOD(kcalc,2).gt.0) then !kcalc is odd
             if(kop(1).gt.1) then
                 write(debugfile,*) ' *** GMUnagata Physical aij + bij/T'
-                write(debugfile,'(6G12.5)') aparam + bparam/T
+                write(debugfile,'(6G12.5)') aparam + bparam/TKelvin
             endif
-            call nagata1(gammares, nc, x, V, aparam + bparam/T)
+            call nagata1(gammares, nc, x, V, aparam + bparam/TKelvin)
         endif
 
 end select
@@ -1166,7 +1028,7 @@ if (aspmx.eq.1) then ! only execute if association exists
 		rhomix = 1D0/(dot_product(x,V)) ! mol/cc
 
 		CALL calc_gammaw(gammaw, kcalc, kop(1), kop(2), nc, nsites, comp, site, &
-							   T, rhomix, rho, KAD, eps, bvol, &
+							   TKelvin, rhomix, rho, KAD, eps, bvol, &
 							   PCSAFT_sigma, PCSAFT_m, PCSAFT_epsok)
 	endif
 
@@ -1177,10 +1039,10 @@ if (aspmx.eq.1) then ! only execute if association exists
 		rhomixD = 1D0/(dot_product(x,VD)) ! mol/cc
 
 		CALL calc_gammaw(dgammaw,  kcalc, kop(1),kop(2), nc, nsites, comp, site, &
-							   (T + delT / 2D0), rhomixU, rhoU, KAD, eps, &
+							   (TKelvin + delT / 2D0), rhomixU, rhoU, KAD, eps, &
 							   bvol, PCSAFT_sigma, PCSAFT_m, PCSAFT_epsok)
 		CALL calc_gammaw(dgammawd, kcalc, kop(1), kop(2), nc, nsites, comp, site, &
-							   (T - delT / 2D0), rhomixD, rhoD, KAD, eps, &
+							   (TKelvin - delT / 2D0), rhomixD, rhoD, KAD, eps, &
 							   bvol, PCSAFT_sigma, PCSAFT_m, PCSAFT_epsok)
 		dgammaw = (dgammaw - dgammawd) / delT
 	endif
@@ -1257,7 +1119,7 @@ dgamma = dgammares + dgammaw + dgammacomb + dgammacombcorr
 
 if(kop(1) .gt. 0) then ! write to history and/or .csv files
 	  WRITE(debugfile,*) '*** GAMMA RESULTS'
-	  WRITE(debugfile,900) KCALC, nc, T, P
+	  WRITE(debugfile,900) KCALC, nc, TKelvin, Pbar
  900  FORMAT(' KCALC, N, T, P =', I3, 1X, I3, F10.3, 2X, E13.6)
 	  if(mod(kcalc,2).gt.0) then !kcalc is odd, write gammas to history
 		WRITE(debugfile,1010)
@@ -1268,11 +1130,11 @@ if(kop(1) .gt. 0) then ! write to history and/or .csv files
 	   if(kop(1) .gt. 2) then
 		! write to vol.csv
 		open(unit=12, file="Output\vol.csv", status='unknown', action='write', position='append')
-		WRITE(12,1002) T, ',', 1D0/rhomix, (', ', i, ',  ', comp(i)%name, ",", X(I), ",", V(i), i=1,nc)
+		WRITE(12,1002) TKelvin, ',', 1D0/rhomix, (', ', i, ',  ', comp(i)%name, ",", X(I), ",", V(i), i=1,nc)
 		close(12)
 		! write to gammas.csv
 		open(unit=10, file="Output\gammas.csv", status='unknown', action='write', position='append')
-		WRITE(10,1001) T, ',', P, (', ', i, ',  ', comp(i)%name, ",", X(I), ",", gammares(i),",",gammacomb(i),",",gammacombcorr(i), ",",gammaw(i), ",",GAMMA(I), ",",dgamma(i), i=1,nc)
+		WRITE(10,1001) TKelvin, ',', Pbar, (', ', i, ',  ', comp(i)%name, ",", X(I), ",", gammares(i),",",gammacomb(i),",",gammacombcorr(i), ",",gammaw(i), ",",GAMMA(I), ",",dgamma(i), i=1,nc)
 		close(10)
 	   endif !kop(1).gt.2
 	  endif !mod(kcalc,2)
@@ -1285,7 +1147,7 @@ if(kop(1) .gt. 0) then ! write to history and/or .csv files
 		if(kop(1).gt.2) then
 		! write to HXS.csv
 		open(unit=11, file="Output\HXS.csv", status='unknown', action='write', position='append')
-		WRITE(11,1001) T, ",", P, (', ', i, ',  ', comp(i)%name, ",", X(I), ",", -dgammares(i)*R*(T**2), ",", -dgammacomb(i)*R*(T**2), ",", -dgammacombcorr(i)*R*(T**2), ",", -dgammaw(i)*R*(T**2), ",", -dgamma(i)*R*(T**2), ',', dgamma(i), i=1,nc)
+		WRITE(11,1001) TKelvin, ",", Pbar, (', ', i, ',  ', comp(i)%name, ",", X(I), ",", -dgammares(i)*Rgas*(TKelvin**2), ",", -dgammacomb(i)*Rgas*(TKelvin**2), ",", -dgammacombcorr(i)*Rgas*(TKelvin**2), ",", -dgammaw(i)*Rgas*(TKelvin**2), ",", -dgamma(i)*Rgas*(TKelvin**2), ',', dgamma(i), i=1,nc)
 		close(11)
 		endif !if kcalc.gt.1
 		endif !kop(1).gt.2
@@ -1331,7 +1193,7 @@ end subroutine GAMMA_PA
 !
 !***************************************************************
 
-SUBROUTINE calc_gammaw(gammaw, kcalc, kop1, gcalcFlag, n, ns, comp, site, T, &
+SUBROUTINE calc_gammaw(gammaw, kcalc, kop1, gcalcFlag, n, ns, comp, site, TKelvin, &
 			rho_mix, rho_pure, KAD, epsADok, bvol, sigma, m, epsok)
 ! Output:
 !	- gammaw	(n)		natural log of gamma from association contribution
@@ -1344,7 +1206,7 @@ SUBROUTINE calc_gammaw(gammaw, kcalc, kop1, gcalcFlag, n, ns, comp, site, T, &
 !						3. PCSAFT
 !   - n		    (scalar)	number of components present
 !	- ns 		(scalar)	numer of sites present
-!	- T		    (scalar)	temperature [K]
+!	- TKelvin   (scalar)	temperature [K]
 !	- rho_mix	(scalar)	density of mixture [mol/cc]
 !	- rho_pure	(n)		density of pure component [mol/cc]
 !	- comp		(n)		component info array of sites present
@@ -1363,14 +1225,14 @@ USE GPA_SITENSPECIES, only: siteinfo, species !pass other variables for legacy r
 IMPLICIT NONE
 
 INTENT(OUT)	::	gammaw
-INTENT(IN)	::	 kcalc, kop1,gcalcFlag, n, ns, comp, site, T, rho_mix, rho_pure, &
+INTENT(IN)	::	 kcalc, kop1,gcalcFlag, n, ns, comp, site, TKelvin, rho_mix, rho_pure, &
 			KAD, epsADok, bvol, sigma, m, epsok
 
 LOGICAL, PARAMETER	::	debug = .False. ! .True. for debugging mode, set .False. to mute
 INTEGER  kcalc, kop1,gcalcFlag, n, ns
-REAL*8 T, rho_mix
+REAL*8 TKelvin, rho_mix
 REAL*8, DIMENSION(n)		::	gammaw, rho_pure, dAdnk, dAdnk_pure
-REAL*8, DIMENSION(ns, ns)	::	Y,KAD, epsADok, KADplus
+REAL*8, DIMENSION(ns, ns)	::	KAD, epsADok, KADplus
 TYPE(species), DIMENSION(n)	::	comp
 TYPE(siteinfo), DIMENSION(ns)	::	site
 !REAL*8, OPTIONAL, DIMENSION(n)	::	bvol, sigma, m, epsok
@@ -1378,8 +1240,8 @@ REAL*8, DIMENSION(n)	::	bvol, sigma, m, epsok
 
 CALL debug_print_start
 
-KADplus = KAD * (DEXP(epsADok / T) - 1D0)
-CALL calc_dAdnk(dAdnk, kcalc, kop1, gcalcFlag, n, ns, comp, site, T, rho_mix, &
+KADplus = KAD * (DEXP(epsADok / TKelvin) - 1D0)
+CALL calc_dAdnk(dAdnk, kcalc, kop1, gcalcFlag, n, ns, comp, site, TKelvin, rho_mix, &
 			rho_pure, KADplus, bvol, sigma, m, epsok)
 !
 CALL calc_dAdnk_pure
@@ -1424,7 +1286,7 @@ CONTAINS
 				END DO
 
 				CALL calc_dAdnk(dAdnk_pure(k:k), kcalc, kop1, gcalcFlag, 1, ns_pure, &
-					comp_pure, site_pure, T, rho_pure(k), rho_pure(k:k), &
+					comp_pure, site_pure, TKelvin, rho_pure(k), rho_pure(k:k), &
 					KADplus_pure, bvol(k:k), sigma(k:k), m(k:k), epsok(k:k))
 				DEALLOCATE(site_pure, KADplus_pure)
 			END IF
@@ -1439,7 +1301,7 @@ CONTAINS
 			PRINT *, 'gcalcFlag='; PRINT *, gcalcFlag
 			PRINT *, 'n='; PRINT *, n
 			PRINT *, 'ns='; PRINT *, ns
-			PRINT *, 'T='; PRINT *, T
+			PRINT *, 'T='; PRINT *, TKelvin
             PRINT *, 'x='; PRINT *, comp%x
 			PRINT *, 'rho_mix='; PRINT *, rho_mix
 			PRINT *, 'rho_pure='; PRINT *, rho_pure
@@ -1485,7 +1347,7 @@ END SUBROUTINE calc_gammaw
 !
 !********************************************************
 
-SUBROUTINE calc_dAdnk(dAdnk, kcalc, kop1, gcalcFlag, n, ns, comp, site, T, rho_mix, &
+SUBROUTINE calc_dAdnk(dAdnk, kcalc, kop1, gcalcFlag, n, ns, comp, site, TKelvin, rho_mix, &
 			rho_pure, KADplus, bvol, sigma, m, epsok)
 
 use GPA_CONSTANTS
@@ -1493,7 +1355,7 @@ USE GPA_SITENSPECIES, only: siteinfo, species !pass other variables for legacy r
 
 IMPLICIT NONE
 INTENT(OUT)	::	dAdnk
-INTENT(IN)	::	gcalcFlag, n, ns, comp, site, T, rho_mix, rho_pure, &
+INTENT(IN)	::	gcalcFlag, n, ns, comp, site, TKelvin, rho_mix, rho_pure, &
 			KADplus, bvol, sigma, m, epsok
 
 LOGICAL, PARAMETER	::	debug = .False. ! .True. for debugging mode, set .False. to mute
@@ -1504,13 +1366,13 @@ REAL*8, DIMENSION(ns, ns)	::	KADplus, mat, del, gterm1
 REAL*8, DIMENSION(ns)		::	vec, Y
 REAL*8, DIMENSION(n)		::	dAdnk, rho_pure
 REAL*8, DIMENSION(n)	::	bvol, sigma, m, epsok
-REAL*8	T, rho_mix, quad_sum_term, sum_term
+REAL*8	TKelvin, rho_mix, quad_sum_term, sum_term
 CHARACTER(LEN=11) FMT
 TYPE(species), DIMENSION(n)	::	comp
 TYPE(siteinfo), DIMENSION(ns)	::	site
 
 CALL gcalc(del, gterm1, gterm2, gcalcFlag, n, ns, KADplus, &
-	comp, site, T, rho_mix, bvol, rho_pure, sigma, m, epsok)
+	comp, site, TKelvin, rho_mix, bvol, rho_pure, sigma, m, epsok)
 CALL calcX(Y, ns, rho_mix, site%xhost, site%noccur, del)
 
 if((kcalc.eq.1).and.(kop1.gt.1)) then
@@ -1560,22 +1422,22 @@ CALL debug_print_end
 
 CONTAINS
 	SUBROUTINE debug_print_start
-		INTEGER i
+		INTEGER ii
 		IF (debug) THEN
 			PRINT *, REPEAT('-',40),'CALL calc_dAdnk',REPEAT('-',40)
 			PRINT *, '>>>>Input:'
 			PRINT *, 'gcalcFlag='; PRINT *, gcalcFlag
 			PRINT *, 'n='; PRINT *, n
 			PRINT *, 'ns='; PRINT *, ns
-			PRINT *, 'T='; PRINT *, T
+			PRINT *, 'T='; PRINT *, TKelvin
 			PRINT *, 'rho_mix='; PRINT *, rho_mix
 			PRINT *, 'rho_pure='; PRINT *, rho_pure
 			PRINT *, 'KADplus='
-			DO i = 1, ns
+			DO ii = 1, ns
 				PRINT *, KADplus(i,:)
 			END DO
 			PRINT *, 'Delta='
-			DO i = 1, ns
+			DO ii = 1, ns
 				PRINT *, Del(i,:)
 			END DO
 			PRINT *, 'bvol='; PRINT *, bvol
@@ -1619,7 +1481,7 @@ END SUBROUTINE calc_dAdnk
 !********************************************************
 
 SUBROUTINE gcalc(del, gterm1, gterm2, gcalcFlag, n, ns, KADplus, &
-		comp, site, T, rho_mix, bvol, rho_pure, sigma, m, epsok)
+		comp, site, TKelvin, rho_mix, bvol, rho_pure, sigma, m, epsok)
 !
 !
 ! Note: no input checkings are done, need to be done before calling the subroutine
@@ -1627,7 +1489,7 @@ USE GPA_SITENSPECIES, only: siteinfo, species ! for legacy reasons
 IMPLICIT NONE
 
 INTENT(OUT)	::	del, gterm1, gterm2
-INTENT(IN)	::	gcalcFlag, n, ns, KADplus, comp, site, T, &
+INTENT(IN)	::	gcalcFlag, n, ns, KADplus, comp, site, TKelvin, &
 			rho_mix, bvol, rho_pure, sigma, m, epsok
 !OPTIONAL	::	bvol, rho_pure, sigma, m, epsok ! inputs that depend on gcalcFlag
 
@@ -1636,7 +1498,7 @@ INTEGER gcalcFlag, n, ns, i, k
 REAL*8, DIMENSION(ns, ns, n)	::	gterm2
 REAL*8, DIMENSION(ns, ns)	::	KADplus, del, gterm1
 REAL*8, DIMENSION(n)		::	bvol, rho_pure, sigma, m, epsok
-REAL*8 T, rho_mix
+REAL*8 TKelvin, rho_mix
 TYPE(species), DIMENSION(n)	::	comp
 TYPE(siteinfo), DIMENSION(ns)	::	site
 
@@ -1672,17 +1534,16 @@ CONTAINS
 	END SUBROUTINE gcalc_generic
 
 	SUBROUTINE gcalc_PCSAFT
-		INTEGER l
 		REAL*8, DIMENSION(n, n, n)	::	ngdgdnk
 		REAL*8, DIMENSION(n, n)		::	g, rhogdgdrho, epsmat, dmat
 		REAL*8, DIMENSION(ns, ns) :: dmatsite
 
-		CALL calc_gterms_PCSAFT(g, rhogdgdrho, ngdgdnk, n, T, rho_mix, comp%x, sigma, m, epsok)
+		CALL calc_gterms_PCSAFT(g, rhogdgdrho, ngdgdnk, n, TKelvin, rho_mix, comp%x, sigma, m, epsok)
 		! transform from component matrix to site matrix and then calculate
-		CALL comp2site(del, g, n, ns, comp, site) ! del is a temporary placeholder for gij matrix
-		CALL comp2site(gterm1, rhogdgdrho, n, ns, comp, site)
+		CALL comp2site(del, g, n, ns, site) ! del is a temporary placeholder for gij matrix
+		CALL comp2site(gterm1, rhogdgdrho, n, ns, site)
 		DO k = 1, n
-			CALL comp2site(gterm2(:,:,k), ngdgdnk(:,:,k), n, ns, comp, site)
+			CALL comp2site(gterm2(:,:,k), ngdgdnk(:,:,k), n, ns, site)
 		END DO
 
 		! Calculate dij matrix
@@ -1693,29 +1554,28 @@ CONTAINS
 		dmat(1,:) = sigma ! fill with sigma values
 		dmat = spread(dmat(1,:),1,n)
 		dmat = (dmat + transpose(dmat))/2D0 ! matrix of average
-		dmat = dmat * (1D0 - 1.2D-1 * DEXP(-3D0 * epsmat / T)) ! matrix of dij
-		CALL comp2site(dmatsite, dmat, n, ns, comp, site) ! del is a temporary placeholder for gij matrix
+		dmat = dmat * (1D0 - 1.2D-1 * DEXP(-3D0 * epsmat / TKelvin)) ! matrix of dij
+		CALL comp2site(dmatsite, dmat, n, ns, site) ! del is a temporary placeholder for gij matrix
         ! pcsaft Delta_ij = N_A*d^3*KADplus*g_ij
 		del = 6.0221408D-1*dmatsite**3 * KADplus * del ! del on RHS is gij matrix
 		gterm1 = gterm1 + 1D0
 	END SUBROUTINE gcalc_PCSAFT
 
-	SUBROUTINE comp2site(sitemat, compmat, n, ns, comp, site)
+	SUBROUTINE comp2site(sitemat, compmat, n1, ns1, site1)
 	! Transform matrix by component to matrix by site, all sites on same
 	! component will have same values
 		INTENT(OUT)	::	sitemat
-		INTENT(IN)	::	compmat, n, ns, comp, site
+		INTENT(IN)	::	compmat, n1, ns1, site1
 
-		INTEGER n, ns, i, j
-		REAL*8, DIMENSION(ns, ns)	::	sitemat
-		REAL*8, DIMENSION(n, n)		::	compmat
-		TYPE(siteinfo), DIMENSION(ns)	::	site
-		TYPE(species), DIMENSION(n)	::	comp
+		INTEGER n1, ns1, i1, j
+		REAL*8, DIMENSION(ns1, ns1)	::	sitemat
+		REAL*8, DIMENSION(n1, n1)		::	compmat
+		TYPE(siteinfo), DIMENSION(ns1)	::	site1
 
 		sitemat = 0D0
-		DO i = 1, ns
-			DO j = 1, ns
-				sitemat(i,j) = compmat(site(i)%host, site(j)%host)
+		DO i1 = 1, ns1
+			DO j = 1, ns1
+				sitemat(i1,j) = compmat(site1(i1)%host, site1(j)%host)
 			END DO
 		END DO
 	END SUBROUTINE comp2site
@@ -1727,7 +1587,7 @@ CONTAINS
 			PRINT *, 'gcalcFlag='; PRINT *, gcalcFlag
 			PRINT *, 'n='; PRINT *, n
 			PRINT *, 'ns='; PRINT *, ns
-			PRINT *, 'T='; PRINT *, T
+			PRINT *, 'T='; PRINT *, TKelvin
 			PRINT *, 'rho_mix='; PRINT *, rho_mix
 			PRINT *, 'rho_pure='; PRINT *, rho_pure
 			PRINT *, 'bvol='; PRINT *, bvol
@@ -1775,7 +1635,7 @@ END SUBROUTINE gcalc
 !
 !****************************************************
 
-SUBROUTINE calc_gterms_PCSAFT(g, rhogdgdrho, ngdgdnk, n, T, rho, x, sigma, m, epsok)
+SUBROUTINE calc_gterms_PCSAFT(g, rhogdgdrho, ngdgdnk, n, TKelvin, rho, x, sigma, m, epsok)
 !
 ! Output:
 !   g           (n x n) radial distribution function [-]
@@ -1784,7 +1644,7 @@ SUBROUTINE calc_gterms_PCSAFT(g, rhogdgdrho, ngdgdnk, n, T, rho, x, sigma, m, ep
 !
 ! Input:
 !   n           (scalar)  number of components
-!   T           (scalar)  temperature [K]
+!   TKelvin     (scalar)  temperature [K]
 !   rho         (scalar)  mixture molar density [mol/cc]
 !   x           (n)      mole fraction of component
 !   sigma       (n)      segment diameter [A]
@@ -1803,11 +1663,11 @@ SUBROUTINE calc_gterms_PCSAFT(g, rhogdgdrho, ngdgdnk, n, T, rho, x, sigma, m, ep
 !   ndgdnk      (n x n x n) [-]
 
 IMPLICIT NONE
-INTENT(IN)      ::      n, T, rho, x, sigma, m, epsok
+INTENT(IN)      ::      n, TKelvin, rho, x, sigma, m, epsok
 INTENT(OUT)     ::      g, rhogdgdrho, ngdgdnk
 INTEGER n
 LOGICAL, Parameter	::	 debug = .false. ! .True. for debugging mode, set .False. to mute
-REAL*8  T, rho, cf, pi, xi2, xi3
+REAL*8  TKelvin, rho, cf, pi, xi2, xi3
 REAL*8, DIMENSION(n)           ::      x, sigma, m, epsok, d, nxi2nk, nxi3nk
 REAL*8, DIMENSION(n, n)       ::      dmat, rhodgdrho, g, rhogdgdrho
 REAL*8, DIMENSION(n, n, n)   ::      ndgdnk, ngdgdnk
@@ -1817,7 +1677,7 @@ pi = 3.14159265D0
 
 CALL debug_print_start
 
-d = sigma * (1D0 - 1.2D-1 * DEXP(-3D0 * epsok / T))
+d = sigma * (1D0 - 1.2D-1 * DEXP(-3D0 * epsok / TKelvin))
 nxi2nk = calc_nxink(2)
 nxi3nk = calc_nxink(3)
 xi2 = DOT_PRODUCT(x, nxi2nk)
@@ -1876,12 +1736,11 @@ CONTAINS
         END SUBROUTINE calc_g
         ! n, T, rho, x, sigma, m, epsok
         SUBROUTINE debug_print_start
-		INTEGER i
 		IF (debug) THEN
 			PRINT *, REPEAT('-',40),'CALL calc_gterms_PCSAFT',REPEAT('-',40)
 			PRINT *, '>>>>Input:'
 			PRINT *, 'n='; PRINT *, n
-			PRINT *, 'T='; PRINT *, T
+			PRINT *, 'T='; PRINT *, TKelvin
 			PRINT *, 'rho='; PRINT *, rho
 			PRINT *, 'x='; PRINT *, x
 			PRINT *, 'sigma='; PRINT *, sigma
@@ -1943,12 +1802,11 @@ INTENT(OUT)	::	Y
 ! as well as the calls to DMS_WRTTRM, DMS_ERRPRT,
 ! lines with global_ldiag, DMS_IRRCHK
 
-INTEGER i, j, ns, nmaxc, nmaxr
+INTEGER i, ns, nmaxc
 INTEGER, DIMENSION(ns)	::	noccur
 REAL*8, DIMENSION(ns, ns)	::	del
 REAL*8, DIMENSION(ns)	::	vec, Y, Y_old, xhost
 REAL*8 Y_diff, rho
-CHARACTER*80 NTEXT, FMT
 LOGICAL	::	debug = .False. ! .True. for debugging mode, set .False. to mute
 
 CALL debug_print_start
@@ -2033,7 +1891,7 @@ intent(out):: gamma
 intent(in):: n, x,tau,alpha
 integer n
 real*8 gamma(n), x(n), tau(n,n), alpha(n,n), G(n,n), Y(n,n)
-real*8 term1(n), term2(n), inverseterm2(n), squareinverseterm2(n), part1(n), part2(n), part3(n), loggamma(n)
+real*8 term1(n), term2(n), inverseterm2(n), squareinverseterm2(n), part1(n), part2(n), part3(n)
 
 ! This program calculates activity coefficients using the NRTL equation.
 ! Each call to nrtl evaluates one composition.
@@ -2114,12 +1972,12 @@ END SUBROUTINE wilson
 !		Calculate Schatchard-Hildebrand Physical Model
 !
 !************************************************
-subroutine scathild(gamma, x, V, n, Aij, R, T)
+subroutine scathild(gamma, x, V, n, Aij, Rgas, TKelvin)
 implicit none
 intent(out):: gamma
-intent(in):: x, n, V, Aij , R, T
+intent(in):: x, n, V, Aij , Rgas, TKelvin
 integer n
-real*8 gamma(n), x(n), V(n), Vmix, phi(1,n), R, T, Aij(n,n)
+real*8 gamma(n), x(n), V(n), Vmix, phi(1,n), Rgas, TKelvin, Aij(n,n)
 real*8 term1(1,1), term2(1,n), RTlnGamma(1,n)
 
 !This function calculates scatchard-hildebrand residual term
@@ -2130,7 +1988,7 @@ term1 = 0.5D0 * matmul(phi,matmul(Aij,transpose(phi)));
 term2 = transpose(matmul(Aij,transpose(phi)));
 RTlnGamma = reshape(V,shape(phi))*(term2-term1(1,1));
 ! gamma is actually ln(gamma)
-gamma = reshape((RTlnGamma/R/T),shape(gamma));
+gamma = reshape((RTlnGamma/Rgas/TKelvin),shape(gamma));
 return
 
 end subroutine scathild
@@ -2162,7 +2020,7 @@ INTENT(OUT)::gamma
 INTEGER n;
 REAL*8 r_mix;
 REAL*8 x(n),rpara(n);
-REAL*8 term2(n),phi(n),term1(n),lnGamma(n),gamma(n);
+REAL*8 term2(n),phi(n),term1(n),gamma(n);
 REAL*8 a(n,n),tau(n,n);
 
 ! mixture molecular geometric-size parameter
@@ -2200,7 +2058,7 @@ implicit none
 intent(out):: gamma
 intent(in):: x, n, V
 integer n
-real*8 gamma(n), x(n), V(n), Vmix, phi(n)
+real*8 gamma(n), x(n), V(n), Vmix
 
 !This function calculates Flory's term
 
