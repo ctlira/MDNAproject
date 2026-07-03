@@ -41,18 +41,18 @@ If you don't already have Visual Studio Installed, [download and install](https:
 
 [Return to TOC](#table-of-contents)
 
-## Step 2. Install Miniconda
+## Step 2. Install Miniconda or Anaconda
 
-If you don't already have Miniconda installed, download and install it using the default settings:
+Note: if you have Anaconda installed, you do not need to install Miniconda. Minconda is much smaller had has all the important needed code. If you don't already have Miniconda installed, download and install it using the default settings:
 
 * **Windows Installer:** [Miniconda Windows 64-bit](https://docs.conda.io/en/latest/miniconda.html)
-* *Note:* Install it as a _user_ on the same account as VS Code. Ensure it installs to the default directory (`%USERPROFILE%\Miniconda3`). The VS Code settings.json will look for fortls in this specific folder.
+* *Note:* Install it as a _user_ on the same account as VS Code. Ensure it installs to the default directory (`%USERPROFILE%\Miniconda3`). The VS Code settings.json will look for fortls in this specific folder. If you have installed previously, the default folder would substitute the name Ananconda3 here and in subsequent instructions.
 
 [Return to TOC](#table-of-contents)
 
 ## Step 3. Create the Shared Fortran-Tools Python Environment
 
-Open your terminal (PowerShell or Command Prompt) and run the following command to create the fotran-tools needed for this repository:
+Open your terminal (PowerShell or Command Prompt) and run the following command to create the fotran-tools needed for this repository (substitute Anaconda3 if you have that installed):
 
 ```cmd
 "%USERPROFILE%\Miniconda3\Scripts\conda.exe" create --name fortran-tools python fortls -c conda-forge --yes
@@ -62,28 +62,42 @@ Open your terminal (PowerShell or Command Prompt) and run the following command 
 
 ## Step 4. Open the Workspace in VS Code
 
+If you have installed Anaconda3 instead of Miniconda3, open .vscode/settings.json in a text editor and replace Miniconda3 with Anaconda3. Do no recommit the file if you have modified this single setting.
+
 The configuration of this repo is intended to be used with either Visual Studio or Visual Studio Code. The implementation of VS Code relies on the environment variables configured in the integration of oneAPI with Visual Studio. **Thus the VS Code instance should always be started from the Intel oneAPI command prompt as given below.**
 
-1. Start the command prompt for Intel oneAPI for Visual Studio. (It may be convenient to pin this to your start menu).
-2. cd to the repo location. (It may be convenient to open the folder first in File Explorer and then copy the repo folder location to paste into the oneAPI command).
-3. Launch VS Code with the command from the oneAPI prompt in the repo root
-```cmd
-Code .
-```
-> Steps 1-3 should also be used for subsequent sessions for VS Code to use the preconfigured .json settings.
-4. On the first launch, when prompted, install the recommended extensions (**Modern Fortran** and **CMake (by Microsoft)**). The **C/C++** and **C/C++** extensions will be automatically installed as dependencies. If you miss the installation notification prompt, click the bell icon in the bottom right. You can also install these by clicking the building blocks button for extensions on the far left panel.
+    **Navigate to the repo directory and run launch_vscode.bat**. The launch_vscode.bat automates steps 1-3
+
+or
+
+    1. Start the command prompt for Intel oneAPI for Visual Studio.
+    2. cd to the repo location
+    3. Launch VS Code with the command from the oneAPI prompt in the repo root by entering "Code ."
+
+> The script file, or steps 1-3 should also be used for subsequent sessions for VS Code to use the preconfigured .json settings.
+
+4. If you use other profiles in VSCode, it is recommended to create a profile for this folder so that settings.json is not modified by other extensions (such as Python). See [VS Help on Profiles](https://code.visualstudio.com/docs/configure/profiles).
+
+    On the first launch, when prompted, install the recommended extensions:
+
+    **Modern Fortran**
+
+    **CMake (by Microsoft)**).
+
+    The **C/C++** and **C/C++** extensions will be automatically installed as dependencies. If you miss the installation notification prompt, click the bell icon in the bottom right. You can also install these by clicking the building blocks button for extensions on the far left panel.
 
 ---
 
 ### Why this works seamlessly for the team:
 
-* **Predictable Paths:** By ensuring everyone uses the default Miniconda installation path, `${env:USERPROFILE}/Miniconda3/...` will resolve flawlessly on every single team member's Windows machine.
+* **Predictable Paths:** By ensuring everyone uses the default Miniconda installation path, `${env:USERPROFILE}/Miniconda3/...` (or Ananconda3) will resolve flawlessly on every single team member's Windows machine.
 * **No Git Pollution:** Since the configuration is entirely portable, nobody will accidentally modify or commit their own absolute paths (like `C:/Users/your-name/...`) to the shared repository.
 
 #### Details on CMake Extensions
 
 What Each Extension Handles
-* fortran-lang.linter (Modern Fortran): Drives your syntax highlighting, hover documentation, and automatically communicates with the fortls.exe server tracking the .git exclusions we fixed.
+* fortran-lang.linter (Modern Fortran): Drives your syntax highlighting, hover documentation, and automatically communicates with the fortls.exe server tracking the .git exclusions.
+* fortls language server analyzes code for relationships.
 * ms-vscode.cmake-tools (CMake Tools): Provides the status bar UI to easily toggle between your debug, release, and relwithdebinfo configuration presets with one click.
 *  ms-vscode.cpptools (C/C++): Supplies the native cppvsdbg debug engine required to read the Visual Studio-style embedded debugging symbols generated by the Intel ifx compiler.
 
@@ -91,7 +105,7 @@ What Each Extension Handles
 
 ## Step 5. Configuration of CMake
 
-Click the CMake Triangle icon in the left toolbar.
+**Click the CMake Triangle icon in the left toolbar.**
 * In the Configure field, edit and select the desired build configuration
 * In the Build field, select the desired build project
 * If the terminal is displayed (Ctrl + \` ) on the 'output' tab you will find that CMake immediately builds a cache and creates an 'out' folder. The 'out' folder can be safely deleted in File Explorer between sessions. (The terminal can be found on the 'View' menu or toggled using (Ctrl + \` ). The 'Terminal' menu will add additional terminal windows, or (Ctrl + Shift + \` ).
@@ -116,7 +130,9 @@ When a FORTRAN file is opened, VS Code will run a linter and language service. H
 
 ### Side-by-Side Comparison
 
-| Feature | Linter (e.g., ESLint, Flake8, `fprettify`) | Language Service (e.g., gopls, Pyright, Intel Fortran Language Server) |
+---
+
+| Feature | Linter (e.g., ifx, ESLint, Flake8, `fprettify`) | Language Service (e.g., fortls, gopls, Pyright) |
 | --- | --- | --- |
 | **Primary Goal** | Catch code smells, style violations, and potential bugs. | Provide code intelligence, navigation, and autocomplete. |
 | **Scope** | Usually analyzes **one file at a time** line-by-line using abstract syntax trees. | Analyzes the **entire project graph**, understanding how files link together. |
@@ -142,7 +158,7 @@ This code distribution depends heavily on .json files to assure a similar develo
 
 **Open the Cmake panel** by clicking the CMake triangle in the left toolbar. The CMake 'Run and Debug' button in the toolbar is used during debugging. Debugging is explained below.
 
-### The Panels
+### The CMake Panels
 
 #### Project Status
 
@@ -152,7 +168,7 @@ Set the Build Configuration and Target Project:
 
     Project Status > Configure: This binds your Configuration/Build Type (e.g., debug, relwithdebinfo, release) directly from your CMakePresets.json. The relwithdebinfo is optimized to /O2 which can still be reliably debugged to assure that the optimization did not break anything. The release build configuration is optimized agressively to /O3 which vectorizes DO loops, which makes debugging impractical. However, testing of the release code against benchmarks is still necessary to make sure the final level of optimization did not break anything.
 
-    Project Status > Build: This is where you click to change your active target from [all] to a specific asset like PGLdll or PGLEOS. It is important to build PGLdll components separately from the PGLEOS because the PGLdll components are configured to link dynamically whereas the PGLEOS is configured to link statically. The system can easily confused by linking to intermediate files shared by the two methods if they don't have the correct build type within the intermediate files. Thus, don't use [all].
+    Project Status > Build: This is where you click to change your active target from [all] to a specific asset like PGLdll or PGLEOS. It is important to build PGLdll components separately from the PGLEOS because the PGLdll components are configured to link dynamically whereas the PGLEOS is configured to link statically. The system can be easily confused by linking to intermediate files shared by the two methods if they don't have the correct build type within the intermediate files. Thus, don't use [all], and clean all projects when switching from a project that uses dynamic linking to a project that uses static linking.
 
     Project Status > Debug: This is where you click to select the target that will be launched by the Debug button.
 
@@ -196,7 +212,7 @@ At the bottom of the Project Outline frame are the overall CMakeLists.txt and CM
 
 This step is not needed on the initial configuration, but it is needed to assure that the caches are not conflicting with previous projects.
 
-**CMake and VS Code cache the project agressively. It is very important to perform a repo level 'clean' when switching between builds of the PGLDll and PGLEos projects.** PGLDll is built for dynamic linking and PGLEos is built for static linking (stand-alone app) so one build can pollute the other with the aggressive caching.
+**CMake and VS Code cache the project agressively. It is very important to perform a repo level 'clean' when switching between builds of the PGLDll and PGLEos/GammaPA projects.** PGLDll is built for dynamic linking and PGLEos and GammaPA are built for static linking (stand-alone app) so one build type can pollute the other due to the aggressive caching.
 
 Occasionally, you may need to Reload the Window, which completely flushes the CMake settings in memory. To execute a reload, call up the VS Code command pallete using Cntl + Shift + P. Start typing 'Developer: Reload Window' and the dropdown will automatically filter.
 
@@ -227,7 +243,7 @@ Because they target completely different layers of your development environment,
 | **Modified `CMakePresets.json**` or changed underlying compiler flags/strategies. | `CMake: Delete Cache and Reconfigure` | Forces CMake to delete `CMakeCache.txt` on disk and re-run its compiler sanity checks. |
 | **Added a brand new `.f90` source file** to a directory tracked by CMake. | `CMake: Configure` | Tells CMake to scan the directories again and update the build targets without wiping its whole memory. |
 
-If CMake is totally confused, the best option is to close VS Code completely. With VS Code closed, delete the 'out' folder. Nothing important is deleted, this forces CMake to start a fresh configuration when VS Code reloads the folder. If you open VS Code in the repo root using the 'Code .' command, then CMake will reconstruct the 'out' folder as soon as VS Code loads.
+If CMake is totally confused, the best option is to close VS Code completely. With VS Code closed, delete the 'out' folder. Nothing important is deleted, this forces CMake to start a fresh configuration when VS Code reloads the folder. When you reopen VS Code, then CMake will reconstruct the 'out' folder.
 
 [Return to TOC](#table-of-contents)
 
@@ -245,7 +261,7 @@ The build button at the bottom VS Code taskbar will trigger display of the 'OUTP
 
 The working directory is the repo root so that the code can properly read/write to the 'Input' and 'Output' folders. When code is launched with the 'Debug' button, VS Code will properly use this working directory.
 
-The compiled code is within the 'out/build/\<build config>/<project folder name>. Using the VS Code launch button bypasses some settings and tries to run the code from this location, but then the 'Input' and 'Output' cannot be found. To run the project outside of the CMake and VS Code environment, move the executable to the root of the repo, or create a folder location with the 'Input' and 'Output' as subfolders.
+The compiled code is within the 'out/build/\<build config>/<project folder name>'. Using the VS Code launch button bypasses some settings and tries to run the code from this location, but then the 'Input' and 'Output' cannot be found. To run the project _outside_ of the CMake and VS Code environment, move the executable to the root of the repo, or create a folder location with the 'Input' and 'Output' as subfolders.
 
     When using PGLTest.exe in this way, due to dynamic linking, the PGLDll.dll needs to also be in the repo root. If on a machine without the oneAPI environment, additional runtime .dll files are needed from the oneAPI redist folder. A dependency app can be used to determine which .dll files are needed.
 
@@ -279,7 +295,7 @@ When debugging the 'Run and Debug' window provides the local variables and provi
 
 ### Folder View
 
-The folder icon in the top of the left toolbar provides a folder view. Single-clicking a file opens a preview window and the filename in the tab is displayed in italics. Double click a file name or the preview tab to open the file, and the filename in the tab will be displayed in regular font. The font color provides feedback on the state of a file. When editing a .json, the tab color indicates when all syntax is OK. Also look for squiggly lines which are also used for FORTRAN files.
+The folder icon in the top of the left toolbar toggles a folder view. Single-clicking a file opens a preview window and the filename in the tab is displayed in italics. Double click a file name or the preview tab to open the file, and the filename in the tab will be displayed in regular font. The font color provides feedback on the state of a file. When editing a .json, the tab color indicates when all syntax is OK. Also look for squiggly lines which are warnings.
 
 ### Linting Cleanup
 
@@ -291,22 +307,21 @@ When viewing the file listings, the letter at the right of the panel shows if it
 
 Clicking an item with changes shows the 'diff' in the file window and provides a popup to 'undo' the changes in hunks.
 
+Files can be staged using the GUI. The terminal accepts line git commands.
+
 ### VS Code Whitespace Settings for Coding
 
-White spaces at the end of lines create confusion in revision control because if the amount of white space changes the line is marked as 'changed'. Also, files shoule end with a new line. To configure these automatically,
-
-* Click the 'Settings' icon at the bottom of the left toolbar.
-* Select the 'User' or 'Workspace'. The 'User' setting applies to all of your use, while 'Workspace' applies to this project. 'User' is recommended for consistency with other code projects. (If you select 'Workspace' and find the settings in the .vscode folder, these are your personal settings, do not add them to the repo!).
-* In the search bar enter: white
-* Check the boxes for
-    * Editor, Auto Trim Auto Whitespace
-    * Files, Trim Trailing Whitespace
+White spaces at the end of lines create confusion in revision control because if the amount of white space changes the line is marked as 'changed'. Also, files shoule end with a new line. These settings are preconfigured in the .vscode/settings.json.
 
 ### Filtering Problems
 
 The Problems window (use Ctrl + \`) is very helpful when viewing code files when linting is enabled. However, warnings can be overwhelming especially when using implicit variable types. On the Problems tab, use the filter box to select which items are shown. Click an item to jump to the location.
 
 Be patient when VS Code first loads before compiling because CMake will run the compiler to identify problems. Initally the problem count may be large, but it may gradually decrease as the linter finds dependent files, etc. as it works in the background.
+
+### Searching within a subproject
+
+CMake generates a file fortls_sources.txt. This is a scratch file - do not commit this file to the repo. Open in a text editor and copy the list of source files from the project that you wish to search. Use the magnifying glass in the left toolbar or Ctrl + Shift + F and paste the list into the box for 'files to include'. Then enter the search term in the top box.
 
 ### Command Palette
 
@@ -315,9 +330,21 @@ The command palette is opened using Ctrl + Shift + P. Commands are best entered 
 * CMake: Clean Rebuild
 * CMake: Delete Cache and Reconfigure
 * Fortran: Restart the Fortran Language Server - if the tool tips are not appearing.
-* Developer: Reload Window - a clean reload of the .json files
+* Developer: Reload Window - a clean reload of the .json files (But does not clean CMake FORTRAN build files)
 
 The recently-used commands appear at the top of the dropdown.
+
+### Autocomplete in terminal
+
+By default, pressing TAB during a command typing will autocomplete with the first match, which is annoying. Type a few letters and then press Ctrl + Spacebar. VS Code documentation provides instructions to configure automatically.
+
+### Viewing Command History
+
+Within the terminal, command history is available.
+
+* Use the up arrow to scroll through the history one command at a time.
+* In the command window, use the shortcut keys Ctrl + Alt + R to bring up the same history as Ctrl + Shift + P -> Terminal: Run Recent command.
+* History for the current session is available by typing 'history' in the command line.
 
 [Return to TOC](#table-of-contents)
 

@@ -16,12 +16,12 @@
     ],
 
     "fortran.fortls.extraArgs": [
-        "--include_dirs", "./out/build/debug",
-        "--excl_paths", "out", "build", "x64", "x86", "Debug", "Release", ".vs", "python", "input", "output", ".git"
+        "--excl_paths", "out", "x64", "x86", ".vs", "python", "input", "output", ".git",
     ],
 
     "C_Cpp.default.compilerPath": "cl.exe",
     "C_Cpp.intelliSenseEngine": "disabled",
+
     "files.insertFinalNewline": true,
     "files.trimTrailingWhitespace": true,
 
@@ -31,5 +31,6 @@
       "**/*_genmod.f90": true,
       "**/*_genmod.mod": true,
       "**/*.mod": true
-    }
+    },
+
 }

@@ -28,15 +28,27 @@ set(SRC_2A
 )
 
 set(SRC_LOCAL
-    PGLWrapper.f90
+    ../Main_PGLdll/PGLWrapper.f90
+)
+
+set(PGLDLL_SOURCES_LCL
+    ${SRC_UA}
+    ${SRC_2A}
+    ${SRC_LOCAL}
+)
+
+# ---------------------------------------------------------
+# Export source list to parent scope for fortls
+# ---------------------------------------------------------
+set(PGLDLL_SOURCES
+    ${PGLDLL_SOURCES_LCL}
+    PARENT_SCOPE
 )
 
 # --- Target -------------------------------------------------------------------
 
 add_library(PGLdll SHARED
-    ${SRC_UA}
-    ${SRC_2A}
-    ${SRC_LOCAL}
+    ${PGLDLL_SOURCES_LCL}
 )
 
 # --- Intel Fortran flags (Windows) -------------------------------------------
@@ -53,3 +65,4 @@ foreach(src ${SRC_UA})
         )
     endif()
 endforeach()
+

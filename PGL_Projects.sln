@@ -12,6 +12,8 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "PGLDLLTest", "PGLDLLTest.vf
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "PGLEos", "PGLEos.vfproj", "{D3E7ADA3-EFB5-4EED-A707-9CA285A9BA63}"
 EndProject
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "GAMMAPA", "GAMMAPA.vfproj", "{04B2103C-147F-4526-AD40-413CE85D0F9A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -44,6 +46,14 @@ Global
 		{D3E7ADA3-EFB5-4EED-A707-9CA285A9BA63}.Release|x64.Build.0 = Release|x64
 		{D3E7ADA3-EFB5-4EED-A707-9CA285A9BA63}.Release|x86.ActiveCfg = Release|Win32
 		{D3E7ADA3-EFB5-4EED-A707-9CA285A9BA63}.Release|x86.Build.0 = Release|Win32
+		{04B2103C-147F-4526-AD40-413CE85D0F9A}.Debug|x64.ActiveCfg = Debug|x64
+		{04B2103C-147F-4526-AD40-413CE85D0F9A}.Debug|x64.Build.0 = Debug|x64
+		{04B2103C-147F-4526-AD40-413CE85D0F9A}.Debug|x86.ActiveCfg = Debug|Win32
+		{04B2103C-147F-4526-AD40-413CE85D0F9A}.Debug|x86.Build.0 = Debug|Win32
+		{04B2103C-147F-4526-AD40-413CE85D0F9A}.Release|x64.ActiveCfg = Release|x64
+		{04B2103C-147F-4526-AD40-413CE85D0F9A}.Release|x64.Build.0 = Release|x64
+		{04B2103C-147F-4526-AD40-413CE85D0F9A}.Release|x86.ActiveCfg = Release|Win32
+		{04B2103C-147F-4526-AD40-413CE85D0F9A}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

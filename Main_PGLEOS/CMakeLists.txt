@@ -42,14 +42,26 @@ set(SRC_LOCAL
     MenuItems2c.f90
 )
 
-# --- Target -------------------------------------------------------------------
-
-add_executable(PGLEOS
+set(PGLEOS_SOURCES_LCL
     ${SRC_MIN}
     ${SRC_UA}
     ${SRC_2A}
     ${SRC_FS}
 	${SRC_LOCAL}
+)
+
+# ---------------------------------------------------------
+# Export source list to parent scope for fortls
+# ---------------------------------------------------------
+set(PGLEOS_SOURCES
+    ${PGLEOS_SOURCES_LCL}
+    PARENT_SCOPE
+)
+
+# --- Target -------------------------------------------------------------------
+
+add_executable(PGLEOS
+    ${PGLEOS_SOURCES_LCL}
 )
 
 # --- Intel Fortran flags (Windows) -------------------------------------------
