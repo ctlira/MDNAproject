@@ -6,10 +6,20 @@
 
 # GammaPA source files
 set(GAMMAPA_SOURCES_LCL
+    # 1. Base utility and modules
     ../SourceCodeUA/0ModuleUAData.f90
     ../SourceCodeUA/UaDataTools.f90
+    ../Main_GammaPA/mod_constants.f90
+    ../Main_GammaPA/mod_reportError.f90
+    ../Main_GammaPA/mod_phys_parms.f90
+    ../Main_GammaPA/mod_sitenspecies.f90
+    ../Main_GammaPA/mod_volumes.f90
+    # 2. Main program and subroutines
     ../Main_GammaPA/GammaPaMain.f90
-    ../Main_GammaPA/gamma_pa.f90)
+    ../Main_GammaPA/gamma_pa.f90
+    ../Main_GammaPA/loadSpecies.f90
+    ../Main_GammaPA/loadAssoc.f90
+    ../Main_GammaPA/loadnrtl.f90)
 
 # ---------------------------------------------------------
 # Export source list to parent scope for fortls

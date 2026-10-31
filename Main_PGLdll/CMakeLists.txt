@@ -51,6 +51,11 @@ add_library(PGLdll SHARED
     ${PGLDLL_SOURCES_LCL}
 )
 
+# Expose the module output directory to downstream targets automatically
+target_include_directories(PGLdll PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/mod>
+)
+
 # --- Intel Fortran flags (Windows) -------------------------------------------
 if(CMAKE_Fortran_COMPILER_ID MATCHES "Intel|IntelLLVM")
     target_compile_options(PGLdll PRIVATE)

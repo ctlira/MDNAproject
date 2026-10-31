@@ -54,12 +54,19 @@
 		<Filter Name="Header Files" Filter="fi;fd;h;inc"/>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
-			<File RelativePath=".\SourceCodeUA\0ModuleUAData.f90">
-			</File>
+			<File RelativePath=".\SourceCodeUA\0ModuleUAData.f90"/>
 			<File RelativePath=".\Main_GammaPA\gamma_pa.f90"/>
 			<File RelativePath=".\Main_GammaPA\GammaPaMain.f90"/>
-			<File RelativePath=".\SourceCodeUA\UaDataTools.f90">
+			<File RelativePath=".\Main_GammaPA\loadAssoc.f90"/>
+			<File RelativePath=".\Main_GammaPA\loadnrtl.f90"/>
+			<File RelativePath=".\Main_GammaPA\loadSpecies.f90"/>
+			<File RelativePath=".\Main_GammaPA\mod_constants.f90"/>
+			<File RelativePath=".\Main_GammaPA\mod_phys_parms.f90"/>
+			<File RelativePath=".\Main_GammaPA\mod_reportError.f90">
 			</File>
+			<File RelativePath=".\Main_GammaPA\mod_sitenspecies.f90"/>
+			<File RelativePath=".\Main_GammaPA\mod_volumes.f90"/>
+			<File RelativePath=".\SourceCodeUA\UaDataTools.f90"/>
 		</Filter>
 	</Files>
 	<Globals/>

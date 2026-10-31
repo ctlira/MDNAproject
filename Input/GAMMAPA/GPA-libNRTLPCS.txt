@@ -1,0 +1,4 @@
+1	npairs	This is a file of NRTL parameters. Units of b_ij are Kelvin. The smallest id should be listed first. Sort by smallest id					
+This file is for benchmark CaseStudy1. The parameters are unrealistic and used only for testing.							
+id1	id2	a12	a21	b12	b21	alpha	ts
+715	5350	0.224434	-2.93407	-296.122	1332.21	0.3	26070620

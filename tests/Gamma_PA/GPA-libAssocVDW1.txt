@@ -1,0 +1,12 @@
+4	nrows. This file is used for g = VDW. The ver list the species ver used for fitting
+26071620	"timestamp, format YYMMDDHH"
+VDW site values used only for benchmarking CaseStudy1. Not realistic
+kop used for these parameters
+kop(1)	kop(2)	kop(3)	kop(4)	kop(5)	kop(6)	kop(7)	kop(8)	kop(9)	kop(10)	kop index
+dbg level	rdf	liq vol	att model	comb corr	comb					kop desc
+2	0	0	0	1	2	0	0	0	0	kop
+ea	ed	kappa	epsAD/k
+21401	51401	20	100.2
+21401	51402	35	100.2
+21402	51402	30	100.2
+21402	51401	25	100.2

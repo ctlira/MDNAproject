@@ -1,0 +1,110 @@
+ *** GAMMA RESULTS
+ KCALC, N, T, P =  3   2   323.150   0.100000E+01
+ I     NAME          X         lnGAMMAres    lnGAMMAcomb  lnGAMMAcombcorr       lnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         1.000000       0.000000       0.000000       0.000000       0.000000       0.000000       0.000000
+  2 METHANOL         0.000000       0.140129      -0.175266       0.000000       5.090258       5.055121      -0.033276
+ I     NAME          X         dlnGAMMAres   dlnGAMMAcomb dlnGAMMAcombcorr     dlnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         1.000000       0.000000       0.000000       0.000000       0.000000       0.000000       0.000000
+  2 METHANOL         0.000000      -0.002911       0.000027       0.000000      -0.030392       5.055121      -0.033276
+ End of function call
+************************************************************************************************************************
+ *** GAMMA RESULTS
+ KCALC, N, T, P =  3   2   323.150   0.100000E+01
+ I     NAME          X         lnGAMMAres    lnGAMMAcomb  lnGAMMAcombcorr       lnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.900000       0.000352      -0.001238       0.000000       0.083232       0.082347      -0.000328
+  2 METHANOL         0.100000       0.134208      -0.152152       0.000000       2.086549       2.068604      -0.005539
+ I     NAME          X         dlnGAMMAres   dlnGAMMAcomb dlnGAMMAcombcorr     dlnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.900000      -0.000003       0.000000       0.000000      -0.000326       0.082347      -0.000328
+  2 METHANOL         0.100000      -0.002875       0.000024       0.000000      -0.002688       2.068604      -0.005539
+ End of function call
+************************************************************************************************************************
+ *** GAMMA RESULTS
+ KCALC, N, T, P =  3   2   323.150   0.100000E+01
+ I     NAME          X         lnGAMMAres    lnGAMMAcomb  lnGAMMAcombcorr       lnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.800000       0.002094      -0.005303       0.000000       0.192711       0.189502      -0.000545
+  2 METHANOL         0.200000       0.124642      -0.129271       0.000000       1.444927       1.440297      -0.004248
+ I     NAME          X         dlnGAMMAres   dlnGAMMAcomb dlnGAMMAcombcorr     dlnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.800000      -0.000025       0.000001       0.000000      -0.000521       0.189502      -0.000545
+  2 METHANOL         0.200000      -0.002753       0.000021       0.000000      -0.001516       1.440297      -0.004248
+ End of function call
+************************************************************************************************************************
+ *** GAMMA RESULTS
+ KCALC, N, T, P =  3   2   323.150   0.100000E+01
+ I     NAME          X         lnGAMMAres    lnGAMMAcomb  lnGAMMAcombcorr       lnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.700000       0.006495      -0.012825       0.000000       0.322443       0.316114      -0.000788
+  2 METHANOL         0.300000       0.111660      -0.106815       0.000000       1.051568       1.056414      -0.003515
+ I     NAME          X         dlnGAMMAres   dlnGAMMAcomb dlnGAMMAcombcorr     dlnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.700000      -0.000097       0.000002       0.000000      -0.000692       0.316114      -0.000788
+  2 METHANOL         0.300000      -0.002543       0.000018       0.000000      -0.000990       1.056414      -0.003515
+ End of function call
+************************************************************************************************************************
+ *** GAMMA RESULTS
+ KCALC, N, T, P =  3   2   323.150   0.100000E+01
+ I     NAME          X         lnGAMMAres    lnGAMMAcomb  lnGAMMAcombcorr       lnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.600000       0.015214      -0.024601       0.000000       0.475800       0.466412      -0.001117
+  2 METHANOL         0.400000       0.095660      -0.085037       0.000000       0.765536       0.776159      -0.002905
+ I     NAME          X         dlnGAMMAres   dlnGAMMAcomb dlnGAMMAcombcorr     dlnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.600000      -0.000259       0.000003       0.000000      -0.000861       0.466412      -0.001117
+  2 METHANOL         0.400000      -0.002246       0.000015       0.000000      -0.000674       0.776159      -0.002905
+ End of function call
+************************************************************************************************************************
+ *** GAMMA RESULTS
+ KCALC, N, T, P =  3   2   323.150   0.100000E+01
+ I     NAME          X         lnGAMMAres    lnGAMMAcomb  lnGAMMAcombcorr       lnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.500000       0.030409      -0.041654       0.000000       0.658439       0.647194      -0.001601
+  2 METHANOL         0.500000       0.077269      -0.064281       0.000000       0.541987       0.554975      -0.002317
+ I     NAME          X         dlnGAMMAres   dlnGAMMAcomb dlnGAMMAcombcorr     dlnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.500000      -0.000570       0.000006       0.000000      -0.001038       0.647194      -0.001601
+  2 METHANOL         0.500000      -0.001872       0.000012       0.000000      -0.000457       0.554975      -0.002317
+ End of function call
+************************************************************************************************************************
+ *** GAMMA RESULTS
+ KCALC, N, T, P =  3   2   323.150   0.100000E+01
+ I     NAME          X         lnGAMMAres    lnGAMMAcomb  lnGAMMAcombcorr       lnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.400000       0.054886      -0.065312       0.000000       0.878624       0.868198      -0.002331
+  2 METHANOL         0.600000       0.057421      -0.045010       0.000000       0.361908       0.374320      -0.001725
+ I     NAME          X         dlnGAMMAres   dlnGAMMAcomb dlnGAMMAcombcorr     dlnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.400000      -0.001108       0.000010       0.000000      -0.001233       0.868198      -0.002331
+  2 METHANOL         0.600000      -0.001436       0.000009       0.000000      -0.000297       0.374320      -0.001725
+ End of function call
+************************************************************************************************************************
+ *** GAMMA RESULTS
+ KCALC, N, T, P =  3   2   323.150   0.100000E+01
+ I     NAME          X         lnGAMMAres    lnGAMMAcomb  lnGAMMAcombcorr       lnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.300000       0.092287      -0.097325       0.000000       1.148409       1.143370      -0.003429
+  2 METHANOL         0.700000       0.037466      -0.027860       0.000000       0.216949       0.226555      -0.001139
+ I     NAME          X         dlnGAMMAres   dlnGAMMAcomb dlnGAMMAcombcorr     dlnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.300000      -0.001987       0.000016       0.000000      -0.001458       1.143370      -0.003429
+  2 METHANOL         0.700000      -0.000968       0.000006       0.000000      -0.000176       0.226555      -0.001139
+ End of function call
+************************************************************************************************************************
+ *** GAMMA RESULTS
+ KCALC, N, T, P =  3   2   323.150   0.100000E+01
+ I     NAME          X         lnGAMMAres    lnGAMMAcomb  lnGAMMAcombcorr       lnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.200000       0.147345      -0.140044       0.000000       1.485854       1.493155      -0.005069
+  2 METHANOL         0.800000       0.019307      -0.013715       0.000000       0.104976       0.110568      -0.000598
+ I     NAME          X         dlnGAMMAres   dlnGAMMAcomb dlnGAMMAcombcorr     dlnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.200000      -0.003362       0.000024       0.000000      -0.001730       1.493155      -0.005069
+  2 METHANOL         0.800000      -0.000516       0.000003       0.000000      -0.000085       0.110568      -0.000598
+ End of function call
+************************************************************************************************************************
+ *** GAMMA RESULTS
+ KCALC, N, T, P =  3   2   323.150   0.100000E+01
+ I     NAME          X         lnGAMMAres    lnGAMMAcomb  lnGAMMAcombcorr       lnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.100000       0.226220      -0.196680       0.000000       1.919155       1.948694      -0.007492
+  2 METHANOL         0.900000       0.005598      -0.003827       0.000000       0.029246       0.031016      -0.000178
+ I     NAME          X         dlnGAMMAres   dlnGAMMAcomb dlnGAMMAcombcorr     dlnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.100000      -0.005447       0.000035       0.000000      -0.002080       1.948694      -0.007492
+  2 METHANOL         0.900000      -0.000155       0.000001       0.000000      -0.000024       0.031016      -0.000178
+ End of function call
+************************************************************************************************************************
+ *** GAMMA RESULTS
+ KCALC, N, T, P =  3   2   323.150   0.100000E+01
+ I     NAME          X         lnGAMMAres    lnGAMMAcomb  lnGAMMAcombcorr       lnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.000000       0.336955      -0.271730       0.000000       2.494778       2.560002      -0.011050
+  2 METHANOL         1.000000       0.000000       0.000000       0.000000       0.000000       0.000000       0.000000
+ I     NAME          X         dlnGAMMAres   dlnGAMMAcomb dlnGAMMAcombcorr     dlnGAMMAw       lnGAMMA      dlnGAMMA
+  1 CYCLOHEX         0.000000      -0.008543       0.000052       0.000000      -0.002559       2.560002      -0.011050
+  2 METHANOL         1.000000       0.000000       0.000000       0.000000       0.000000       0.000000       0.000000
+ End of function call
+************************************************************************************************************************
