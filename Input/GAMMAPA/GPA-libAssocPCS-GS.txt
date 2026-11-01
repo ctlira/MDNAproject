@@ -4,6 +4,6 @@ Values from Aseel Bala thesis for PCSAFT, based on Gross and Sadowski, 2002
 kop used for these parameters
 kop(1)	kop(2)	kop(3)	kop(4)	kop(5)	kop(6)	kop(7)	kop(8)	kop(9)	kop(10)	kop index
 dbg level	rdf	liq vol	att model	comb corr	comb					kop desc
-1	3	0	0	1	2	0	0	0	0	kop
+1	3	1	0	1	1	0	0	0	0	kop
 ea	ed	kappa	epsAD/K	source
 21401	51401	0.03518	2899.5	17

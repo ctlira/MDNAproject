@@ -18,8 +18,7 @@ idTRC	vSTD	R	Q	Veq	vparms 1-7
 Site library file: C:\Users\ctlir\Documents\repos\MDNAproject\input\GAMMAPA\GPA-libSites.txt
 Timestamp from association parameter file:     26071620
 KOP from association file.
-1	3	0	0	1	2	0	0	0	0	kop
-**KOP for assoc file differs from KOP for this case.**
+1	3	1	0	1	1	0	0	0	0	kop
 ea	ed	kappa	epsAD/K	source
 21401	51401	3.51800E-02	2899.5
 NRTL file: GPA-libNRTLPCS.txt

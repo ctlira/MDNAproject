@@ -1,4 +1,4 @@
-57	nGrps	Site Library
+58	nGrps	Site Library
 Each compound will specifically list the number of Groups of each type
 Group/Site ids will be 5 digits to facilitate main groups and subgroups
 "Group ids start with 1, ea start with 2, ed start with 5, eda start with 9"
