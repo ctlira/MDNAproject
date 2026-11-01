@@ -26,17 +26,21 @@ All the input and output files are tab-delimited (except the state calculations 
 
 Files can be edited in the following ways:
 * Using Notepad or Notepad++. A plugin is available for Notepad++ to align tabs, Columns++. After the Columns++ plugin is installed, the tabs can be aligned using Plugins>Columns++>Elastic tabstops. Excel is easier to use with the described caveat.
-* Excel can be used to open or edit files, but with a major caveat. Excel will aggressively modify exponentials to three significant digits, resulting in a substantial loss of precision. This occurs whether the file is opened by Excel, or if the file is opened in a text editor and then copy/pasted into Excel. When the file is saved as .csv or .txt or 'copied' again to paste to a text file, only the displayed digits in the exponential number are transferred. The work-around is to:
+* Excel can be used to open or edit files, but with a two major caveats. Excel will aggressively modify exponentials to three significant digits, resulting in a substantial loss of precision and also will insert extra tabs when saving. The loss of precision occurs whether the file is opened by Excel, or if the file is opened in a text editor and then copy/pasted into Excel. When the file is saved as .csv or .txt or 'copied' again to paste to a text file, only the displayed digits in the exponential number are transferred. The work-around is to:
   * Initiate a search and click the 'Format...' button. Select the Scientific category and set to two decimal places. Click OK.
   * Next click the 'Replace' tab and again select 'Format ...'. Select the Scientific category and set to five decimal places. Click OK.
   * Next click 'Replace All'. Then drag the cell widths as necessary to view the digits.
-  * One more step is necessary to avoid changes in white space at the end of rows. Excel pads every row to have the same number of 'cells' as the widest row with tabs. Before committing to the repo, open the file in Notepad++ and select Edit>Blank Operations>Trim Trailing Space. The extra tabs will be removed even though they are not 'spaces'. If extra tabs are present, Git will tag the line as changed even though if no changes of importance are made.
+  * One more step is necessary to avoid changes in white space at the end of rows. Excel pads every row to have the same number of 'cells' as the widest row with tabs. Before committing to the repo, use one of the following tools:
+    * Open the file in Notepad++ and select Edit>Blank Operations>Trim Trailing Space. or
+    * Open the file in VS Code (without moving from the project directory) and then resave. The .vscode/settings.json includes lines that enforce file hygiene automatically for files within the repo folders edited in VS Code.
+
+    The extra tabs will be removed even though they are not 'spaces'. If extra tabs are present, Git will tag the line as changed even though if no changes of importance are made.
 
 * Output of calculated T,P,x,gamma,Hex states are written as a formatted ouput line that is only space delimited. The easiest way to convert these lines is to:
   * Open the output file in Excel.
   * Select the space-delimited state calculations rows at the end of the file.
   * Use Data>Text to Columns. Set as space delimited, collapsing multiple spaces.
-  * Then apply the exponential formatting procedure specified above.
+  * Then apply the exponential/white space formatting procedure specified above.
 
 ## Benchmark Files
 
