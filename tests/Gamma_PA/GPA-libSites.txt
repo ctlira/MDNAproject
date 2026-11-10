@@ -1,0 +1,69 @@
+58	nGrps	Site Library
+Each compound will specifically list the number of Groups of each type
+Group/Site ids will be 5 digits to facilitate main groups and subgroups
+"Group ids start with 1, ea start with 2, ed start with 5, eda start with 9"
+The 2nd and 3rd digits are the main group. The 4th and 5th are the subgroup
+"For example, if hydroxyls are main group 14, and 2B methanol is subtype 01, then methanol"
+is site 11401 with one 21401 and one 51401.
+"If carboxylic acid is eda main type 40 and acetic is subtype 01, then acetic would have one 94001"
+"The table of association constants will list the smaller id in column1, then the larger id in column2, except when eda is acceptor"
+"Groups start on line 12, sorted by increasing group number"
+Group_id	n_ea	n_ed	n_eda	ea siteId	ed siteId	eda siteId		comment
+10002	1	0	0	20002			CO2
+10003	1	1	0	20003	50003		NH3
+10004	2	2	0	20004	50004		H2S
+10007	0	1	0		50001		CO
+10015	1	1	0	20015	50015		NO
+10310	1	0	0	20310			"Proton on CL3C-H, Chloroform."
+10802	1	0	0	20802			Butadiene solvation with ACN/DMF	1-2 or 1-3?
+11101	1	0	0	21101			Alkyne HC?
+11102	1	0	0	21102			H<CN> in Hydrogen Cyanide
+11202	1	1	0	21202	51202		Alkyne C? of <CN> in nitrile (with 2302)
+11203	1	0	0	21203			"Alkyne C?, vinylacetylene "
+11204	1	0	0	21204			"Alkyne C?, 2alkyne"
+11301	2	2	0	21301	51301		H2O  AB Amir Version
+11302	2	2	0	21302	51302		H2O  old version
+11303	1	1	0	21303	51303		H2O  2B water
+11401	1	1	0	21401	51401		MeOH
+11402	1	1	0	21402	51402		EtOH
+11403	1	1	0	21403	51403		"nC4OH,nC5OH"	"resim C4OH w/203site&reoptimize,1ols"
+11404	1	1	0	21404	51404		"iPrOH 0.000500, 2-butanol, ..."
+11405	1	1	0	21405	51405		tBuOH
+11406	1	1	0	21406	51406		HO- phenol
+11407	1	1	0	21407	51407		HO- lactate mostly intramolecular
+11408	1	1	0	21408	51408		"OH- attached to non-aromatic ring, e.g. cyclohexanol"
+11409	1	1	0	21409	51409		glycerol
+11410	1	1	0	21410	51410		"NO2 (dimerizes to N2O4), also used for carbinol (e.g., __oxyEthanol)"
+11411	1	1	0	21411	51411		Glycol
+11501	0	1	0		51501		">O aliphatic ether (nAs=0 => double the energy vs HB3???), MTBE"
+11504	0	1	0		51504		">O 6ring ether, dioxane"
+11507	0	1	0		51507		">O 5ring ether, THF"
+11600	1	1	0	21600	51600		"O= Acetone (simulated with 1601, but customized in BIPs and ParmsHb)"
+11601	0	1	0		51601		O= 3.2 2-Butanone?
+11602	0	1	0		51602		"O= Ester, incl formate (strongly affects W+acetate LLE)"
+11603	1	1	0	21603	51603		"O= in carboxy acid !eDon&eAcc required! same bondVol used for C-C (dimer) site on this interaction, eHbCC=3*eHbAD."
+11605	0	1	0		51605		"O= Amide (incl DMF, donor on 1903)"
+11606	1	1	0	21606	51606		"O= Aldehyde(.0005,53,2)"
+11610	0	1	0		51610		O= middle -ketones &ring-ones
+11702	1	0	0	21702			"S in sulfate, incl SO2"
+11801	1	1	0	21801	51801		HS- nPrSH
+11901	1	1	0	21901	51901		"NH2- in 1' amine, e.g. nPrNH2"
+11902	1	1	0	21902	51902		"NH2- in aniline, e.g. PphenylDiAmine"
+11903	1	0	0	21903			"NH2- in 1' amide, (acceptor on 1605,O=)"
+11904	1	1	0	21904	51904		"NH2 in 2' amine, e.g. 2ButylAmine, CyHexAmine"
+11905	1	1	0	21905	51905		NH2- in hydrazine
+12001	1	1	0	22001	52001		"NH< in 2' amine, e.g. DiEtAmine, DiProAmine, DiButAmine,...(Baskaya et al.)"
+12002	1	1	0	22002	52002		"NH< in 5-ring, e.g. pyrrolidine"
+12101	0	1	0		52101		">N- in 3' amine, amide, e.g. TriEtAmine, DMF"
+12103	1	1	0	22103	52103		">N- in Nitro, eg nitroethane"	We treat the N as associating even though it islike one O is +ve and the other is -ve.  But the O's have the same id and we can't put 1 donor and one acceptor on each O b/c that would be a 4Bsite model.
+12201	0	1	0		52201		=AN- imine (pyridine) (=> 4.1 with water)
+12301	0	1	0		52301		N2
+12400	1	1	0	22400	51300		Cl- in HCl
+12403	0	1	0		52403		tetraChloroEthylene
+12406	2	0	0	22406			diCl- in dichloromethane
+12500	1	1	0	22500	52500		F- in HF
+12510	1	0	0	22510			CFH- in heptafluoropropane
+12700	1	1	0	22700	52700		Br- in HBr
+12800	1	1	0	22800	52800		I- in HI
+13300	2	2	0	23300	53300		H2Se
+14001	0	0	1			94001	acetic acid
