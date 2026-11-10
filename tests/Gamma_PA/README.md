@@ -7,7 +7,7 @@ The library files for these case studies are included in the folder in the event
 
 The input files for the case studies are:
 * GPA-CaseStudyMeOH-CycloC6.txt - This is the case study for the distributed code described in ..\..\Main_GammaPA except that only activity coefficients are evaluated. The additional parameter files are:
-    * GPA-libAssocPCS2a.txt
+    * GPA-libAssocPCS.txt
     * GPA-libNRTLPCS.txt
 * GPA-CaseStudy1.txt - This is CaseStudy1 in Wertheim_documentation_Bench.docx. Only the gammas and Hex are evaluated, not any phase equilibria. The additional parameter files are:
     * GPA-libAssocVDW1.txt
