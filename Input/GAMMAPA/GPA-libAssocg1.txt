@@ -1,0 +1,25 @@
+17	nrows. This file is used for g = 1
+26110509	"timestamp, format YYMMDDHH"
+"Values from Killian, source 18, table 4, except primary alcohols greater than ethanol were averaged."
+kop used for these parameters
+kop(1)	kop(2)	kop(3)	kop(4)	kop(5)	kop(6)	kop(7)	kop(8)	kop(9)	kop(10)	kop index
+dbg level	rdf	liq vol	att model	comb corr	comb					kop desc
+1	4	1	0	1	1	0	0	0	0	kop
+ea	ed	kappa	epsAD/K	source
+21401	51401	1.761	2590.9	18
+21401	51402	1.2341	2638	using 350K
+21401	51403	1.1939	2668.3	using 350K
+21401	51404	1.0199	2676.5	using 350K
+21402	51401	1.2341	2638	using 350K
+21402	51402	0.86487	2685.2	18
+21402	51403	0.8367	2715.4	using 350K
+21402	51404	0.71475	2723.6	using 350K
+21403	51401	1.1939	2668.3	using 350K
+21403	51402	0.8367	2715.4	using 350K
+21403	51403	0.80945	2745.7	values from ref 18 were averaged and regressed
+21403	51404	0.69147	2753.9	using 350K
+21404	51401	1.0199	2676.5	using 350K
+21404	51402	0.71475	2723.6	using 350K
+21404	51403	0.69147	2753.9	using 350K
+21404	51404	0.59068	2762.1	"18 using 2 butanol, not IPA"
+21405	21405	0.54158	2725.8	18

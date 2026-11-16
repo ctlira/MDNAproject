@@ -1,0 +1,22 @@
+Reference	doi	citation (Fluid Phase Format)
+1	10.1021/ie010954d	"J. Gross, G. Sadowski, Application of the Perturbed-Chain SAFT Equation of State to Associating Systems, Ind. Eng. Chem. Res. 41 (2002) 5510–5515. https://doi.org/10.1021/ie010954d."
+2	10.1016/S0378-3812(00)00302-2	"J. Gross, G. Sadowski, Application of perturbation theory to a hard-chain reference fluid: an equation of state for square-well chains, Fluid Phase Equilibria. 168 (2000) 183–199. https://doi.org/10.1016/S0378-3812(00)00302-2."
+3	10.1063/1.5041454	"B.D. Marshall, A molecular equation of state for alcohols which includes steric hindrance in hydrogen bonding, J. Chem. Phys. 149 (2018) 044505. https://doi.org/10.1063/1.5041454."
+4		"Killian, unpublished"
+5	10.1021/ie00104a021	"W.G. Chapman, K.E. Gubbins, G. Jackson, M. Radosz, New reference equation of state for associating liquids, Industrial & Engineering Chemistry Research. 29 (1990) 1709–1721. https://doi.org/10.1021/ie00104a021."
+6	10.1021/ie00058a017	"Hansen, H. K.; Rasmussen, P.; Fredenslund, A.; Schiller, M.; Gmehling, J. Vapor-Liquid Equilibria by UNIFAC Group Contribution. 5. Revision and Extension. 4."
+7	Thesis	"Tihic, A. (2008) Group Contribution sPC-SAFT Equation of State"
+8	10.1016/S0378-3812(03)00003-7	"Ting, P. D.; Joyce, P. C.; Jog, P. K.; Chapman, W. G.; Thies, M. C. Phase Equilibrium Modeling of Mixtures of Long-Chain and Short-Chain Alkanes Using Peng–Robinson and SAFT. Fluid Phase Equilibria 2003, 206 (1), 267–286. https://doi.org/10.1016/S0378-3812(03)00003-7."
+9	10.1016/S0378-3812(03)00147-X	"Ghosh, A.; Chapman, W. G.; French, R. N. Gas Solubility in Hydrocarbons—a SAFT-Based Approach. Fluid Phase Equilibria 2003, 209 (2), 229–243. https://doi.org/10.1016/S0378-3812(03)00147-X."
+10	10.1016/S0378-3812(03)00363-7	"Kouskoumvekaki, I. A.; von Solms, N.; Michelsen, M. L.; Kontogeorgis, G. M. Application of the Perturbed Chain SAFT Equation of State to Complex Polymer Systems Using Simplified Mixing Rules. Fluid Phase Equilibria 2004, 215 (1), 71–78. https://doi.org/10.1016/S0378-3812(03)00363-7."
+11	10.1002/9780470747537 	"G.M. Kontogeorgis, G.K. Folas, Thermodynamic Models for Industrial Applications, John Wiley & Sons, Ltd, Chichester, UK, 2010. http://doi.wiley.com/10.1002/9780470747537 (appendix A)"
+12		Killian fit to Asprion Aug 2021
+13	10.1021/acs.jpcb.5b12375 	"Fouad, W. A.; Wang, L.; Haghmoradi, A.; Asthagiri, D.; Chapman, W. G. Understanding the Thermodynamics of Hydrogen Bonding in Alcohol-Containing Mixtures: Cross-Association. J. Phys. Chem. B 2016, 120 (13), 3388–3402. https://doi.org/10.1021/acs.jpcb.5b12375."
+14	10.1021/acs.iecr.9b03198	"NguyenHuynh, D.; Tran, S. T. K.; Mai, C. T. Q. Predicting the Phase Behavior of Alcohols, Aromatic Alcohols, and Their Mixtures Using the Modified Group-Contribution Perturbed-Chain Statistical Associating Fluid Theory. Ind. Eng. Chem. Res. 2019, 58 (36), 16963–16977. https://doi.org/10.1021/acs.iecr.9b03198."
+15	10.1016/j.fluid.2016.09.020	"NguyenHuynh, D. A Modified Group-Contribution PC-SAFT Equation of State for Prediction of Phase Equilibria. Fluid Phase Equilibria 2016, 430, 33–46. https://doi.org/10.1016/j.fluid.2016.09.020."
+16		Benchmark1 - distributed with 2.6.5rel
+17		"Benchmark2 - internal test document, random (unrealistic) parameter values to test code"
+18	10.1021/acs.iecr.3c00968	"W.G. Killian, A.T. Norfleet, L. Peereboom, C.T. Lira, Fourier Transform Infrared Spectroscopy Applied to Association Modeling of Binary Alcohol + Cyclohexane Mixtures, Ind. Eng. Chem. Res. 62 (2023) 14620–14637. https://doi.org/10.1021/acs.iecr.3c00968."
+19		"Bala Ahmed, A. M. Fundamental Studies and Engineering Modeling of Hydrogen Bonding. Ph.D. Thesis, Michigan State University, East Lansing, MI, 2018."
+20		"W.G. Killian, PhD work files used to generate figures for source 18"
+21		"Refitted using avg value for >= C3 or secondary alcohols using files from source 20"
