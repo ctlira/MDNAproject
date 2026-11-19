@@ -15,6 +15,11 @@ project(MDNAproject LANGUAGES Fortran)
 # Global settings (safe defaults)
 # ---------------------------------------------------------
 
+# --- Centralize all build outputs into the root binary directory ---
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 # Track and link the Fortran runtime dynamically across all subprojects by default.
 # Override explicitly for specific stand-alone projects using release compile flags within the project CMakeLists.
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
