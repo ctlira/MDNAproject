@@ -10,13 +10,16 @@
 
   // CMake: point to the actual project root
   "cmake.sourceDirectory": "${workspaceFolder}",
+  "cmake.debugConfig": {
+    "cwd": "${workspaceFolder}"
+  },
 
   // fortls path
   "fortran.fortls.path": "${env:USERPROFILE}/Miniconda3/envs/fortran-tools/Scripts/fortls.exe",
 
   // fortran formatter, use fprettify. findent is compiled in C++ and is not as portable due to runtime dependencies.
   "fortran.formatting.formatter": "fprettify",
-  "fortran.formatting.path": "C:/Users/ctlir/Miniconda3/envs/fortran-tools/Scripts",
+  "fortran.formatting.path": "${env:USERPROFILE}/Miniconda3/envs/fortran-tools/Scripts",
   "fortran.formatting.fprettifyArgs": [
     "--indent",
     "2"
