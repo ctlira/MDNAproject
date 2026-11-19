@@ -7,6 +7,7 @@
     "Main_PGLEOS",
     "MINPACK",
     "SourceCode2a",
+    "SourceCodeUA",
     "C:/Program Files (x86)/Intel/oneAPI/compiler/latest/opt/compiler/include"
   ],
   "include_dirs": [

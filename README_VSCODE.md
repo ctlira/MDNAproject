@@ -462,7 +462,7 @@ Linting is not expected to work properly on the first load of a project that has
 
 If you have customized settings.json, it should not be committed back to the repository. However, the local changes will prevent merging any updates into your local copy. The following workflow is recommended.
 
-1. View the repo for any code changes and the customized settings.json should be listed.
+1. View the repo using a Git-aware directory tool that scans for modified files. For example, the VS Code Git folder viewer or GitHub desktop will show if the file is modified, and opening the file will show the diff. Instead of manually copying code diff, the following is easiest.
 2. Copy the customized settings.json to a local untracked file, such as setttings_mine.json.
 3. Revert settings.json to the distributed version.
 4. Execute the merge.

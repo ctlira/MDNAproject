@@ -43,8 +43,8 @@ set(SRC_LOCAL
 )
 
 set(PGLEOS_SOURCES_LCL
-    ${SRC_MIN}
     ${SRC_UA}
+    ${SRC_MIN}
     ${SRC_2A}
     ${SRC_FS}
 	${SRC_LOCAL}
