@@ -335,7 +335,7 @@ CMake adds a Build, Debug, Launch icon to the bottom toolbar. If the Build targe
 
 The debug icon is used to launch the debugger for the project specified in Project Status Pane.
 
-The launch icon runs the code from the CMake folder rather than the parent folder, and thus the input/output paths don't work. Once release code is written, it should be placed in the project parent folder and run from that location in the terminal window.
+Once release code is written, it should be placed in the project parent folder and run from that location in the terminal window.
 
 [Return to TOC](#table-of-contents)
 
@@ -430,6 +430,12 @@ By default, pressing TAB during a command typing will suggest autocomplete with 
 
 When viewing code, right-clicking on a subroutine call or variable will provide a link to the definition, even if in a different file. The back arrow in the top menu bar will then return you to the previous cursor location.
 
+### Integration with Git
+
+When viewing the file listings, the letter at the right of the panel shows if items are unmodified, etc. and hovering shows more details. The left toolbar includes a 'Git' button that opens a panel to show the history in the lower window and a summary of changes in the upper window.
+
+Clicking an item with changes shows the 'diff' in the file window and provides a popup to 'undo' the changes in hunks.
+
 ### VS Code Whitespace Settings for Coding
 
 White spaces at the end of lines create confusion in revision control because if the amount of white space changes the line is marked as 'changed'. Also, files should end with a new line. These settings are preconfigured in the .vscode/settings.json.
@@ -485,11 +491,13 @@ If you have customized settings.json, it should not be committed back to the rep
 
 The project CMakelists.txt provides a list of files in the order of compiling and linking. To build the file list, a powershell script scan-fortran.ps1 is provided to crawl the folders for module definitions and common blocks. Files with module definitions should be listed before they are used. CMake is 'smart' and recompiles only the set of files needed. If the fourth from the last file is edited, only the last four files will be compiled again before linking. If missing symbols are found when linking, check the file order. When the files are sorted by folder, the order that the files are added is also important.
 
+If source code is placed in new folders, add the new folders to the source code folders in .fortls.
+
 [Return to TOC](#table-of-contents)
 
 ## 15. Adjusting Compile Flags
 
-Compile flags are predominantly in CMakePresets.json with some in .vscode/settings.json. To view more warnings, edit to /warn:all. To enforce a specific FORTRAN standard, use /stand:f90 or adjust the Fortran standard, e.g. f18.
+Compile flags are predominantly in CMakePresets.json with some in .vscode/settings.json. To view more warnings, edit to /warn:all. To enforce a specific FORTRAN standard, use /stand:f90 or adjust the Fortran standard, e.g. f18. If you use implicit variable, turn off the declaration warning by editing /warn:declaration to /warn:nodeclaration.
 
 Compile commands for fixed format .f/.for files are within the project CMakeLists.txt. Project-specific flags can be added immediately after the target_compile_options. Flags are appended, and subsequent flags will take precedence in the case of conflicts. The exact compile commands are in out/\<build config>/build.ninja and .ninja.log. Some flags in the logs may use Linux format dashes instead of the Windows format slash. CMake adjusts the flags to the Windows format before passing to the compiler/linker.
 
@@ -506,6 +514,6 @@ The result should point to `...\Intel\oneAPI\compiler\...\bin\ifx.exe`. If Intel
 
 
 ### Git not working
-Git should be in the environment used to launch VS Code. If 'where git' does not find git in the command window used to launch VS Code, then you can either add Git to your path, or you can open the VS Code settings (Cntl + ,). Search in the 'user settings for 'git.path' and insert the path. Close and reopen VS Code.
+Git should be in the environment used to launch VS Code. If 'where git' does not find git in the command window used to launch VS Code, then you can either add Git to your path, or you can open the VS Code settings (Cntl + ,). Search in the user settings for 'git.path' and insert the path. Close and reopen VS Code.
 
 [Return to TOC](#table-of-contents)
