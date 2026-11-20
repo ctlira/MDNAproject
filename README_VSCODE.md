@@ -99,7 +99,7 @@ Open a _Command_ (cmd) terminal and run the following commands to create the for
     ```cmd
     conda install -n fortran-tools -c conda-forge "cmake>=3.30" ninja
     ```
-    You will need the path to cmake.exe, so determine that path for your installation, often something like %USERPROFILE%\Miniconda3\envs\fortran-tools\Library\bin\cmake.exe. You can verify installation using 'cmake --version' which should report 3.30 or newer
+    You may need to add the cmake.exe path to VS Code, so determine that path for your installation, often something like %USERPROFILE%\Miniconda3\envs\fortran-tools\Library\bin\cmake.exe. You can determine installation path using 'cmake --version' which should report 3.30 or newer
 
 You may close the Command window. If you want to confirm installation of fortls and fprettify, navigate in Windows File Explorer to %USERPROFILE%\Miniconda3\envs\fortran-tools\Scripts to find fortls.exe, fprettify.exe.
 
@@ -111,12 +111,23 @@ You may close the Command window. If you want to confirm installation of fortls 
 
 Navigate to the project root folder. If you have installed a different distribution of conda instead of Miniconda3, open `.vscode/settings.json` and globally replace `Miniconda3` with the path to your distribution. Keep this machine-specific customization local; do not commit it.
 
-If you have VS2019 and updated cmake, add the path to settings.json adjusting the path below to your path:
+Continue with step B, but return here if you discover errors in cmake. If you have VS2019 and updated cmake, and cmake produces and error, you will need to add the path to settings.json or the VS Code user interface.
 
-```cmd
-"cmake.cmakePath": "${env:USERPROFILE}/Miniconda3/envs/fortran-tools/Library/bin/cmake.exe",
-```
-See [13. A Few Hints on Getting Started with VS Code](#13-a-few-hints-on-getting-started-with-vs-code) to merge updates to the repo without overwriting the customizations.
+1. If you don't see the terminal window, use "Cntl + `" to display the terminal frame.
+2. Click the tab for 'Output'.
+3. Adjust the filter to 'CMake/Build' and scroll to the top.
+4. Look for the command that loads cmake. If it is not your newly installed cmake, one option is to add a custom path to settings.json adjusting the path below to your path (include the comma at the end):
+
+   ```cmd
+   "cmake.cmakePath": "${env:USERPROFILE}/Miniconda3/envs/fortran-tools/Library/bin/cmake.exe",
+   ```
+   The other option is
+
+   1. Use "Cntl + ," to open settings.
+   2. On the user tab, search for 'cmake.cmakePath'.
+   3. Enter the path to your newly installed cmake.exe.
+
+See [13. A Few Hints on Getting Started with VS Code](#13-a-few-hints-on-getting-started-with-vs-code) to merge updates from the repo without overwriting the customizations.
 ### B. Start VS Code from the Intel oneAPI environment
 
 * **Preferred - Navigate to the repo directory in Command Prompt (cmd) and run `launch_vscode.bat`**. The script uses Visual Studio Installer's `vswhere.exe` to locate the latest installed Visual Studio. Keep the Command Prompt open if you may need to relaunch VS Code from the initialized oneAPI environment.
@@ -135,7 +146,7 @@ On the first launch, when prompted, install the recommended extensions:
 
 * **Modern Fortran**
 
-* **CMake (by Microsoft)**.
+* **CMake (by Microsoft)**. (This is the VS Code interface to the cmake installation, not the cmake application.)
 
 * The **C/C++** extension will be automatically installed as a dependency.
 
@@ -152,7 +163,7 @@ Also configure the debugger for allocated and structured variables.
 
 ### Why this workflow is seamless for the team:
 
-* **Predictable Paths:** By ensuring everyone uses the default Miniconda installation path, `${env:USERPROFILE}/Miniconda3/...` (or Ananconda3) will resolve flawlessly on every single team member's Windows machine.
+* **Predictable Paths:** By ensuring everyone uses the default Miniconda installation path, `${env:USERPROFILE}/Miniconda3/...` (or Ananconda3/Condaforge3, etc.) will resolve flawlessly on every single team member's Windows machine.
 * **No Git Pollution:** Since the configuration is entirely portable, nobody will accidentally modify or commit their own absolute paths (like `C:/Users/your-name/...`) to the shared repository.
 
 The VS Code configuration uses `${env:USERPROFILE}` rather than a developer-specific absolute path. If your Conda distribution or installation location differs from the defaults above, adjust the relevant local settings without committing machine-specific paths.
@@ -189,7 +200,7 @@ Files can be staged using the GUI. The terminal accepts git line commands for ad
 
 ### Run and Debug
 
-The run and debug icon requires a launch.json file. These features are redundant with the CMake settings described below and are not used for this project.
+The run and debug icon permits running and debugging similar to the Cmake debug icons described below.
 
 ### Extensions
 
